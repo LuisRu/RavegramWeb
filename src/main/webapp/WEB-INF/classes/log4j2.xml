@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+
+	<!-- Logging Properties -->
+	<Properties>
+		<Property name="LOG_PATTERN">%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} %p %m%n
+		</Property>
+		<Property name="APP_LOG_ROOT">c:/logs</Property>
+	</Properties>
+
+	<Appenders>
+
+		<!-- Console Appender -->
+		<Console name="Console" target="SYSTEM_OUT" follow="true">
+			<PatternLayout pattern="${LOG_PATTERN}" />
+		</Console>
+
+
+		<RollingFile name="commonLog"
+			fileName="${APP_LOG_ROOT}/ravegram.log"
+			filePattern="${APP_LOG_ROOT}/ravegram-%d{yyyy-MM-dd}-%i.log">
+			<LevelRangeFilter minLevel="DEBUG" maxLevel="FATAL"
+				onMatch="ACCEPT" onMismatch="DENY" />
+			<PatternLayout pattern="${LOG_PATTERN}" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="10MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="10" />
+		</RollingFile>
+
+		<!-- <RollingFile name="frameworkLog" fileName="${APP_LOG_ROOT}/ravegram-framework.log" 
+			filePattern="${APP_LOG_ROOT}/ravegram-framework-%d{yyyy-MM-dd}-%i.log"> <LevelRangeFilter 
+			minLevel="ERROR" maxLevel="ERROR" onMatch="ACCEPT" onMismatch="DENY"/> <PatternLayout 
+			pattern="${LOG_PATTERN}"/> <Policies> <SizeBasedTriggeringPolicy size="10MB" 
+			/> </Policies> <DefaultRolloverStrategy max="10"/> </RollingFile> <RollingFile 
+			name="debugLog" fileName="${APP_LOG_ROOT}/ravegram-debug.log" filePattern="${APP_LOG_ROOT}/ravegram-debug-%d{yyyy-MM-dd}-%i.log"> 
+			<LevelRangeFilter minLevel="DEBUG" maxLevel="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/> 
+			<PatternLayout pattern="${LOG_PATTERN}"/> <Policies> <SizeBasedTriggeringPolicy 
+			size="10MB" /> </Policies> <DefaultRolloverStrategy max="10"/> </RollingFile> 
+			<RollingFile name="infoLog" fileName="${APP_LOG_ROOT}/ravegram-info.log" 
+			filePattern="${APP_LOG_ROOT}/ravegram-info-%d{yyyy-MM-dd}-%i.log" > <LevelRangeFilter 
+			minLevel="INFO" maxLevel="INFO" onMatch="ACCEPT" onMismatch="DENY"/> <PatternLayout 
+			pattern="${LOG_PATTERN}"/> <Policies> <SizeBasedTriggeringPolicy size="10MB" 
+			/> </Policies> <DefaultRolloverStrategy max="10"/> </RollingFile> <RollingFile 
+			name="errorLog" fileName="${APP_LOG_ROOT}/ravegram-error.log" filePattern="${APP_LOG_ROOT}/ravegram-error-%d{yyyy-MM-dd}-%i.log" 
+			> <LevelRangeFilter minLevel="ERROR" maxLevel="ERROR" onMatch="ACCEPT" onMismatch="DENY"/> 
+			<PatternLayout pattern="${LOG_PATTERN}"/> <Policies> <SizeBasedTriggeringPolicy 
+			size="10MB" /> </Policies> <DefaultRolloverStrategy max="10"/> </RollingFile> 
+			<RollingFile name="traceLog" fileName="${APP_LOG_ROOT}/ravegram-trace.log" 
+			filePattern="${APP_LOG_ROOT}/ravegram-trace-%d{yyyy-MM-dd}-%i.log" > <PatternLayout 
+			pattern="${LOG_PATTERN}"/> <Policies> <SizeBasedTriggeringPolicy size="10MB" 
+			/> </Policies> <DefaultRolloverStrategy max="1"/> </RollingFile> -->
+
+
+
+	</Appenders>
+
+	<Loggers>
+
+		<!-- <Logger name="com.luis.ravegram.dao" additivity="false" level="debug"> 
+			<AppenderRef ref="debugLog" /> <AppenderRef ref="Console" /> </Logger> -->
+
+		<Root level="info">
+			<AppenderRef ref="commonLog" />
+			<AppenderRef ref="Console" />
+		</Root>
+
+	</Loggers>
+
+</Configuration>
