@@ -31,6 +31,7 @@ public class CookieManager {
 		}
 		Cookie cookie = new Cookie(name, value); 
 		cookie.setMaxAge(ttl);
+		cookie.setPath("/");
 		response.addCookie(cookie);
 	}
 }
