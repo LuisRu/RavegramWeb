@@ -7,8 +7,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.luis.ravegram.web.controller.PrivateUsuarioServlet;
-
 public class CookieManager {
 
 	private static Logger logger = LogManager.getLogger(CookieManager.class);

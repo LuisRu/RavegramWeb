@@ -11,11 +11,13 @@ public class AttributeNames {
 	public static final String FOLLOWING = "following";
 	public static final String USER = "user";
 	public static final String USERS = "users";
+	public static final String ASISTENTES = "asistentesr";
 	public static final String EVENT = "event";
 	public static final String EVENTS = "events";
 	public static final String ESTABLECIMIENTO = "establecimiento";
 	public static final String ESTABLECIMIENTOS = "establecimientos";
 	public static final String PUNTUACIONES = "puntuaciones";
+	public static final String CREATE = "create";
 
 	
 }

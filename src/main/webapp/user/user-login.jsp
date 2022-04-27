@@ -12,7 +12,7 @@
               </div>  
               <form action="<%=CONTEXT%>/<%=ControllerPaths.USER%>" method="post" class="login-form" id="login-form">
               
-              <%@include file="/common/errors.jsp"%>
+              
               
               <input type="hidden" name="<%=ParameterNames.ACTION%>" value="<%=ActionNames.USER_LOGIN%>"/>
                 <p class="text-center alert-danger" id="error_message"></p>

@@ -2,6 +2,7 @@ package com.luis.ravegram.web.controller;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,26 +17,35 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 
 import com.luis.ravegram.exception.DataException;
+import com.luis.ravegram.exception.UserNotFoundException;
+import com.luis.ravegram.model.EventoDTO;
+import com.luis.ravegram.model.Results;
 import com.luis.ravegram.model.UsuarioDTO;
+import com.luis.ravegram.model.UsuarioEventoPuntuaDTO;
+import com.luis.ravegram.model.criteria.EventoCriteria;
+import com.luis.ravegram.model.criteria.UsuarioCriteria;
+import com.luis.ravegram.model.state.EventoEstado;
 import com.luis.ravegram.service.EventoService;
+import com.luis.ravegram.service.PuntuacionService;
 import com.luis.ravegram.service.UsuarioService;
 import com.luis.ravegram.service.UsuarioSigueService;
 import com.luis.ravegram.service.impl.EventoServiceImpl;
+import com.luis.ravegram.service.impl.PuntuacionServiceImpl;
 import com.luis.ravegram.service.impl.UsuarioServiceImpl;
 import com.luis.ravegram.service.impl.UsuarioSigueServiceImpl;
 import com.luis.ravegram.web.controller.util.ActionNames;
 import com.luis.ravegram.web.controller.util.AttributeNames;
 import com.luis.ravegram.web.controller.util.ControllerPaths;
 import com.luis.ravegram.web.controller.util.CookieManager;
-import com.luis.ravegram.web.controller.util.Estados;
+import com.luis.ravegram.web.controller.util.ErrorsNames;
 import com.luis.ravegram.web.controller.util.ParameterNames;
 import com.luis.ravegram.web.controller.util.SessionManager;
 import com.luis.ravegram.web.controller.util.ViewPaths;
 import com.luis.ravegram.web.util.ParametersUtil;
+import com.luis.ravegram.web.util.ValidationUtils;
 
 /**
- * Controlador (Servlet) para peticiones de usuario
- * autenticadas.
+ * Controlador (Servlet) para peticiones de usuario autenticadas.
  */
 @WebServlet("/private/usuario")
 public class PrivateUsuarioServlet extends HttpServlet {
@@ -45,190 +55,225 @@ public class PrivateUsuarioServlet extends HttpServlet {
 	private UsuarioService usuarioService = null;
 	private EventoService eventoService = null;
 	private UsuarioSigueService usuarioSigueService = null;
-
+	private PuntuacionService puntuacionService = null;
 
 	public PrivateUsuarioServlet() {
 		super();
 		usuarioService = new UsuarioServiceImpl();
 		eventoService = new EventoServiceImpl();
 		usuarioSigueService = new UsuarioSigueServiceImpl();
+		puntuacionService = new PuntuacionServiceImpl();
 	}
 
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// CommandManager.getInstance().doAction(request, response);Errors errors = new
+		// Errors();
 
-		//CommandManager.getInstance().doAction(request, response);Errors errors = new Errors();
-		Errors errors = new Errors();
-		request.setAttribute(AttributeNames.ERRORS, errors);
 		String targetView = null;
 		boolean forward = true;
+
+		Errors errors = new Errors();
+		request.setAttribute(AttributeNames.ERRORS, errors);
+
+		Map<String, String[]> mapParameter = request.getParameterMap();
+		ValidationUtils.setMapParameter(mapParameter);
+
 		String actionName = request.getParameter(ParameterNames.ACTION);
 
 		if (logger.isInfoEnabled()) {
-			logger.info("Processing action "+actionName);
+			logger.info("Processing action " + actionName);
 		}
-		if (ActionNames.USER_DETAIL.equalsIgnoreCase(actionName)) {
-			// Ver el perfil de un usuario desde otro 
 
+		if (ActionNames.USER_SEARCH.equalsIgnoreCase(actionName)) {
+			// BUSQUEDA CRITERIA
 
-			String idUsuarioStr = request.getParameter(ParameterNames.ID);							
-			Long usuarioId = Long.valueOf(idUsuarioStr); // unsafe conversion
-			
-			try {			
-				UsuarioDTO usuarioBusqueda = usuarioService.findById(usuarioId);
-				request.setAttribute(AttributeNames.USER, usuarioBusqueda);
-				request.setAttribute(AttributeNames.ACTION, actionName);
-				request.setAttribute(AttributeNames.ID, usuarioId);
-			} catch (Exception e) {
-				logger.error("Profile: ",e.getMessage(),e);
+			String distanciaStr = request.getParameter(ParameterNames.DISTANCIA);
+			String edadMaxStr = request.getParameter(ParameterNames.EDAD_MAX);
+			String edadMinStr = request.getParameter(ParameterNames.EDAD_MIN);
+
+			UsuarioCriteria uc = new UsuarioCriteria();
+			uc.setDistanciaKm(null);
+			uc.setEdadHasta(null);// maxima
+			uc.setEdadDesde(null);
+
+			try {
+				Results<UsuarioDTO> usuarios = usuarioService.findByCriteria(uc, 1, 10);
+				request.setAttribute(AttributeNames.USERS, usuarios.getData());
+
+				targetView = ViewPaths.USER_RESULT;
+
+			} catch (DataException de) {
+				logger.error("EventSearch: ", de.getMessage(), de);
+				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
+
 			}
 
-			targetView = ViewPaths.USER_PROFILE;
+		} else if (ActionNames.USER_DELETE.equalsIgnoreCase(actionName)) {
+			// delete user
 
-		} else if (ActionNames.USER_MY_PROFILE.equalsIgnoreCase(actionName)) {
+			targetView = ViewPaths.USER_LOGIN;
 
-	
-			request.setAttribute(AttributeNames.USER, SessionManager.get(request, AttributeNames.USER));
-			request.setAttribute(AttributeNames.ACTION, actionName);
-			targetView = ViewPaths.USER_PROFILE;
-
-			
-		}else if (ActionNames.USER_DELETE.equalsIgnoreCase(actionName)) {	
-			
-			targetView=ViewPaths.USER_LOGIN;
-			
-			
 			UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
-			
-			
+
 			try {
-				usuarioService.updateEstado(usuario.getId(),Estados.USER_DELETE);
-				
+
+				usuarioService.deleteAll(usuario.getId());
+
 				CookieManager.setValue(response, AttributeNames.USER, Strings.EMPTY, -1);
 				SessionManager.set(request, AttributeNames.USER, null);
-				
-			}catch (Exception e) {
-				// TODO: handle exception
+
+			} catch (UserNotFoundException unfe) {
+				logger.error("UserDelete: ", unfe.getMessage(), unfe);
+				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
+			} catch (DataException de) {
+				logger.error("UserDelete: ", de.getMessage(), de);
+				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
 			}
-			
-		}else if (ActionNames.USER_FOLLOW.equalsIgnoreCase(actionName)) {
+
+		} else if (ActionNames.USER_MY_PROFILE.equalsIgnoreCase(actionName)) {
+			// my perfil
+			UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
+
+			try {
+				// buscar eventos disponibles
+				EventoCriteria ec = new EventoCriteria();
+				ec.setIdCreador(usuario.getId());
+				ec.setTipoEstadoEvento(EventoEstado.APTO);
+				ec.setLatitudBuscador(usuario.getLatitud());
+				ec.setLongitudBuscador(usuario.getLongitud());
+				Results<EventoDTO> resultsEventosDisponibles = eventoService.findByCriteria(ec, 1, 10);
+
+				// buscamos todas las puntuaciones que recibio los eventos un usuario
+				Results<UsuarioEventoPuntuaDTO> resultsPuntuaciones = puntuacionService
+						.findByEventosUsuario(usuario.getId(), 1, 10);
+
+				request.setAttribute(AttributeNames.EVENTS, resultsEventosDisponibles.getData());
+				request.setAttribute(AttributeNames.PUNTUACIONES, resultsPuntuaciones.getData());
+
+				targetView = ViewPaths.USER_MY_PROFILE;
+
+			} catch (DataException de) {
+				logger.error("UserMyProfile: ", de.getMessage(), de);
+				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
+			}
+
+		} else if (ActionNames.USER_FOLLOW.equalsIgnoreCase(actionName)) {
+			// follow
 
 			targetView = ViewPaths.HOME;
 
 			String idSeguidoStr = request.getParameter(ParameterNames.ID);
 			UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
 
-
 			try {
 
 				usuarioSigueService.follow(usuario.getId(), Long.valueOf(idSeguidoStr));
 
-				//actualizamos la lista de seguidos
-				Set <Long> idsSeguidos = usuarioService.findSeguidosIds(usuario.getId());
+				Set<Long> idsSeguidos = usuarioService.findSeguidosIds(usuario.getId());
 				SessionManager.set(request, AttributeNames.FOLLOWING, idsSeguidos);
 
-				// redirect al detalle del usuario
-				targetView = ControllerPaths.PRIVATE_USER+"?action="+ActionNames.USER_DETAIL+"&"
-								+ParameterNames.ID+"="+idSeguidoStr;
-				forward = false;
-				
-			} catch (DataException de) {
-				logger.error("Follow: "+idSeguidoStr,de.getMessage(), de);
-				errors.addCommonError("Ha ocurrido un problema al consultar sus datos. Por favor inténtelo mas tarde.");
-			} catch (Exception e) {
-				logger.error("Follow: ",e.getMessage(),e);
-				errors.addCommonError("Se ha producido un problema. Por favor intentelo de nuevo mas tarde.");
-			}	
+				Map<String, String> userDetailParams = new HashMap<String, String>();
+				userDetailParams.put(ParameterNames.ACTION, ActionNames.USER_DETAIL);
+				userDetailParams.put(ParameterNames.ID, idSeguidoStr);
 
-		}else if (ActionNames.USER_UNFOLLOW.equalsIgnoreCase(actionName)) {
+				targetView = ParametersUtil.getURL(ControllerPaths.USER, userDetailParams);
+				forward = false;
+
+			} catch (DataException de) {
+				logger.error("Follow: " + idSeguidoStr, de.getMessage(), de);
+				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
+			}
+
+		} else if (ActionNames.USER_UNFOLLOW.equalsIgnoreCase(actionName)) {
+			// unfollow
 
 			targetView = ViewPaths.HOME;
 
 			String idSeguidoStr = ParametersUtil.getValue(request, ParameterNames.ID);
 			UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
 
-
 			try {
 
-				usuarioSigueService.unFollow(usuario.getId(),Long.valueOf(idSeguidoStr) );
+				usuarioSigueService.unFollow(usuario.getId(), Long.valueOf(idSeguidoStr));
 
-				//actualizamos la lista de seguidos
-				Set <Long> idsSeguidos = usuarioService.findSeguidosIds(usuario.getId());
+				Set<Long> idsSeguidos = usuarioService.findSeguidosIds(usuario.getId());
 				SessionManager.set(request, AttributeNames.FOLLOWING, idsSeguidos);
-				
-				// redirect al detalle del usuario
-				
+
 				Map<String, String> userDetailParams = new HashMap<String, String>();
 				userDetailParams.put(ParameterNames.ACTION, ActionNames.USER_DETAIL);
 				userDetailParams.put(ParameterNames.ID, idSeguidoStr);
-												
-				targetView = ParametersUtil.getURL(ControllerPaths.PRIVATE_USER, userDetailParams); 
+
+				targetView = ParametersUtil.getURL(ControllerPaths.USER, userDetailParams);
 				forward = false;
-	
-				
+
 			} catch (DataException de) {
-				logger.error("Follow: "+idSeguidoStr,de.getMessage(), de);
-				errors.addCommonError("Ha ocurrido un problema al consultas sus datos. Por favor inténtelo mas tarde.");
-			} catch (Exception e) {
-				logger.error("Follow: ",e.getMessage(),e);
-				errors.addCommonError("Se ha producido un problema. Por favor intentelo de nuevo mas tarde.");
-			}	
-		
+				logger.error("UnFollow: " + idSeguidoStr, de.getMessage(), de);
+				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
+			}
 
 		} else if (ActionNames.USER_LOGOUT.equalsIgnoreCase(actionName)) {
-			//LOGOUT
+			// LOGOUT
+
 			if (logger.isInfoEnabled()) {
 				UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
-				logger.info("Logging out "+usuario.getEmail());
+				logger.info("Logging out " + usuario.getEmail());
 			}
+
 			targetView = ViewPaths.USER_LOGIN;
 			forward = false;
-			
+
 			CookieManager.setValue(response, AttributeNames.USER, Strings.EMPTY, -1);
 			SessionManager.set(request, AttributeNames.USER, null);
-			
-			
-			
+
 		} else if (ActionNames.USER_UPDATE.equalsIgnoreCase(actionName)) {
-			//UPDATE
+			// UPDATE
+
+			UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
+
 			targetView = ViewPaths.USER_UPDATE;
-			
-			String userNameStr = request.getParameter(ParameterNames.USER_NAME);
-			String contraseñaStr = request.getParameter(ParameterNames.PASSWORD);
-			String fechaNacimiento = request.getParameter(ParameterNames.FECHA_NACIMIENTO);
-			String sexoStr = request.getParameter(ParameterNames.SEXO);
-			String biografiaStr = request.getParameter(ParameterNames.BIOGRAFIA);
-			
-			UsuarioDTO usuario = new UsuarioDTO();
-			usuario.setUserName(userNameStr);
-			usuario.setContrasena(null);
-			usuario.setFechaNacimiento(null);
-			usuario.setSexo(null);
-			usuario.setBiografia(biografiaStr);
-			
-			
-			try {
-				usuarioService.update(usuario);
-				SessionManager.set(request, AttributeNames.USER, usuario);
-			}catch (Exception e) {
-				// TODO: handle exception
+
+			UsuarioDTO usuarioCrear = usuario;
+			usuarioCrear.setUserName(ValidationUtils.userName(errors, ParameterNames.USER_NAME));
+			usuarioCrear.setContrasena(usuario.getContrasena());
+			System.out.println(usuarioCrear.getContrasena());
+			usuarioCrear.setFechaNacimiento(ValidationUtils.fecha(errors, ParameterNames.FECHA_NACIMIENTO));
+			usuarioCrear.setSexo(ValidationUtils.sexo(errors, ParameterNames.SEXO));
+			usuarioCrear.setBiografia(ValidationUtils.biografia(errors, ParameterNames.BIOGRAFIA));
+			// TODO
+			usuarioCrear.setTelefono("698166923");
+			usuarioCrear.setLatitud(22.00000D);
+			usuarioCrear.setLongitud(22.00000D);
+			// usuarioCrear.setEmail(usuario.getEmail());
+			// usuarioCrear.setTipoEstadoCuenta(usuario.getTipoEstadoCuenta());
+
+			if (!errors.hasErrors()) {
+				try {
+					usuarioService.update(usuarioCrear, usuario);
+					SessionManager.set(request, AttributeNames.USER, usuarioCrear);
+					targetView = ViewPaths.HOME;
+				} catch (UserNotFoundException unfe) {
+					logger.error("UserUpdate: ", unfe.getMessage(), unfe);
+					errors.addCommonError(ErrorsNames.ERROR_USER_NOT_FOUND_EXCEPTION);
+				} catch (DataException de) {
+					logger.error("UserUpdate: ", de.getMessage(), de);
+					errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
+				}
 			}
-			
 		}
 
-		logger.info("Redirigiendo a "+targetView);
+		logger.info("Redirigiendo a " + targetView);
 		if (forward) {
 			request.getRequestDispatcher(targetView).forward(request, response);
 		} else {
-			response.sendRedirect(request.getContextPath()+targetView);
-		} 
-			
-
+			response.sendRedirect(request.getContextPath() + targetView);
+		}
 
 	}
 
-
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		doGet(request, response);
 	}
 

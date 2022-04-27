@@ -4,7 +4,8 @@ public class ActionNames {
 
 	public static final String USER_SEARCH = "user-search";
 	public static final String USER_DELETE = "user-delete";
-	public static final String USER_SEARCH_FOLLOW_MUTUAL = "user-search-follow-mutual";
+	public static final String USER_FOLLOWER_NOT_ACCEPT = "user-follower-not-accept";
+	public static final String USER_SEARCH_ASSISTANTS= "user-searcher-not-accept";
 	public static final String USER_SEARCH_FOLLOWING = "user-search-following";
 	public static final String USER_SEARCH_FOLLOWER = "user-search-follower";
 	public static final String USER_DETAIL = "user-detail";
@@ -21,7 +22,8 @@ public class ActionNames {
 	public static final String EVENT_DETAIL = "event-detail";
 	public static final String EVENT_CREATE = "event-create";
 	public static final String EVENT_UPDATE = "event-update";
-	public static final String EVENT_ALL_STATES = "event-all-states";
+	public static final String EVENT_DELETE = "event-delete";
+	public static final String EVENT_DISPO = "event-dispo";
 	
 	public static final String PUNTUACION_CREATE = "puntuacion-create";
 	
@@ -35,6 +37,11 @@ public class ActionNames {
 	
 	public static final String ESTABLECIMIENTO_SEARCH = "establecimiento-search";
 	public static final String ESTABLECIMIENTO_DETAIL = "establecimiento-detail";
+	
+	public static final String TIPO_MUSICA = "tipo-musica";
+	public static final String TIPO_TEMATICA= "tipo-tematica";
+	public static final String TIPO_ESTABLECIMIENTO= "tipo-establecimiento";
+	public static final String TIPO_ESTADO_EVENTO = "tipo-estado-evento";
 	
 	
 	

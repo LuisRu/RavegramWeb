@@ -3,6 +3,8 @@
 
 <%@include file="/common/searcher.jsp"%>
 <%
+
+ 
 	
 	List<EventoDTO> eventos = (List<EventoDTO>) request.getAttribute(AttributeNames.EVENTS);
 	for (EventoDTO e : eventos) {
@@ -17,7 +19,7 @@
                 <div class="profile-pic">
                   <img src="<%=CONTEXT%>/css/images/profile.jpg" alt="" />
                 </div>
-                <a href="<%=CONTEXT%>/private/usuario?action=<%=ActionNames.USER_DETAIL%>&<%=ParameterNames.ID%>=<%=e.getIdUsuario()%>"><p class="username"><%=e.getNombreUsuarioCreador() %></p></a>
+                <a href="<%=CONTEXT%>/usuario?action=<%=ActionNames.USER_DETAIL%>&<%=ParameterNames.ID%>=<%=e.getIdUsuario()%>"><p class="username"><%=e.getNombreUsuarioCreador() %></p></a>
               </div>
               <i class="fas fa-ellipsis-h options"></i>
             </div>

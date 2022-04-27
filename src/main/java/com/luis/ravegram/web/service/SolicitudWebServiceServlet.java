@@ -15,15 +15,14 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.luis.ravegram.model.SolicitudDTO;
-import com.luis.ravegram.model.SolicitudEstado;
 import com.luis.ravegram.model.UsuarioDTO;
+import com.luis.ravegram.model.state.SolicitudEstado;
 import com.luis.ravegram.service.SolicitudService;
 import com.luis.ravegram.service.impl.SolicitudServiceImpl;
 import com.luis.ravegram.web.controller.util.ActionNames;
 import com.luis.ravegram.web.controller.util.AttributeNames;
 import com.luis.ravegram.web.controller.util.ParameterNames;
 import com.luis.ravegram.web.controller.util.SessionManager;
-import com.mysql.cj.protocol.ValueDecoder;
 
 
 @WebServlet("/solicitud-service")
@@ -52,7 +51,7 @@ public class SolicitudWebServiceServlet extends HttpServlet {
 			UsuarioDTO usuario = (UsuarioDTO)  SessionManager.get(request, AttributeNames.USER);
 
 			try {
-				List<SolicitudDTO> solicitudes = solicitudService.solicitudesAMisEventosPendientes(usuario.getId(), usuario.getLatitud(),usuario.getLongitud());
+				List<SolicitudDTO> solicitudes = solicitudService.findSolicitudesPendientes(usuario.getId());
 				String json = gson.toJson(solicitudes);
 
 				// si no sale texto/html hay que indicar el tipo de contenido (MIMETYPE)
@@ -71,13 +70,17 @@ public class SolicitudWebServiceServlet extends HttpServlet {
 
 
 		}else if(ActionNames.SOLICITUD_ACEPTAR.equals(actionStr)) {
-			
-			String idUsuarioStr = request.getParameter(ParameterNames.ID);
-			String idEventoStr = request.getParameter(ParameterNames.ID_DOS); 
+
+			String idEventoStr = request.getParameter(ParameterNames.ID);
+
+			Long idEvento = Long.valueOf(idEventoStr);
+
+			UsuarioDTO usuario = (UsuarioDTO)  SessionManager.get(request, AttributeNames.USER);
+
 
 			try {
-				solicitudService.updateEstadoSolicitudesEvento(Long.valueOf(idUsuarioStr),Long.valueOf(idEventoStr),SolicitudEstado.ACEPTADO);
-				
+				solicitudService.updateEstado(usuario.getId(), idEvento, SolicitudEstado.ACEPTADO);
+
 				String json = gson.toJson("OK");
 
 				// si no sale texto/html hay que indicar el tipo de contenido (MIMETYPE)
@@ -91,18 +94,22 @@ public class SolicitudWebServiceServlet extends HttpServlet {
 
 
 			} catch (Exception e) {
-				logger.error("usuarioId: "+idUsuarioStr, e);
+				logger.error("action: "+ActionNames.SOLICITUD_ACEPTAR+" idEvento :"+idEvento, e);
 			}								
 
-			
+
 		}else if(ActionNames.SOLICITUD_RECHAZAR.equals(actionStr)) {
-			
-			String idUsuarioStr = request.getParameter(ParameterNames.ID);
-			String idEventoStr = request.getParameter(ParameterNames.ID_DOS); 
+
+			String idEventoStr = request.getParameter(ParameterNames.ID);
+
+			Long idEvento = Long.valueOf(idEventoStr);
+
+			UsuarioDTO usuario = (UsuarioDTO)  SessionManager.get(request, AttributeNames.USER);
+
 
 			try {
-				solicitudService.updateEstadoSolicitudesEvento(Long.valueOf(idUsuarioStr),Long.valueOf(idEventoStr),SolicitudEstado.ACEPTADO);
-				
+				solicitudService.updateEstado(usuario.getId(), idEvento, SolicitudEstado.RECHAZADO);
+
 				String json = gson.toJson("OK");
 
 				// si no sale texto/html hay que indicar el tipo de contenido (MIMETYPE)
@@ -116,9 +123,10 @@ public class SolicitudWebServiceServlet extends HttpServlet {
 
 
 			} catch (Exception e) {
-				logger.error("usuarioId: "+idUsuarioStr, e);
-			}					
+				logger.error("action: "+ActionNames.SOLICITUD_RECHAZAR+" idEvento :"+idEvento, e);
+			}
 		}
+
 
 	}
 

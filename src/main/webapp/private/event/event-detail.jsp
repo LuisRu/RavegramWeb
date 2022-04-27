@@ -6,74 +6,6 @@
 <script>
 
 
-		function buscarSeguidosMutuamenteAjax() {
-		    var url = "/Ravegram/usuario-service";
-		        $.ajax({
-		           type: "GET",
-		           url: url,
-		       data: "action=user-search-follow-mutual&id="+<%=request.getParameter(ParameterNames.ID)%>,
-		       success: function(data) {
-		    	$('#usuarios').empty();
-		        for (i = 0; i<data.length; i++) {
-		        	$('#usuarios').append('<option>'+data[i].userName+'</option>');
-		        }
-		      }
-		    });
-		        
-		}
-
-
-
-		function initMostrarAñadir(){
-		    $('#añadir-usuarios-popup').click(function(){
-		    	if ($('.añadir-usuarios').is(':hidden'))
-		    		   $('.añadir-usuarios').show();
-		    			
-		    		else
-		    		   $('.añadir-usuarios').hide();
-		    	
-		    });
-		}
-
-
-		window.addEventListener("load",comenzar,false);
-		
-		
-		function comenzar(){
-			usuariosASeleccionar = document.getElementById("usuarios");
-			usuariosSeleccionados = document.getElementById("usuariosSeleccionados");
-			
-			usuariosASeleccionar.addEventListener("click",pasar,false);
-			usuariosSeleccionados.addEventListener("click",regresar,false);
-			
-		
-		}
-		
-	
-		
-		function pasar(){
-			let seleccionadas = usuariosASeleccionar.selectedOptions;
-			let destino = usuariosSeleccionados;
-			if(seleccionadas.length>0){	
-				while(seleccionadas.length>0){
-					destino.add(seleccionadas[0]);				
-				}	
-			  }
-			}
-		
-		
-		
-		function regresar(){
-			let seleccionadas = usuariosSeleccionados.selectedOptions;
-			let destino = usuariosASeleccionar;
-			if(seleccionadas.length>0){
-				while(seleccionadas.length>0){
-					destino.add(seleccionadas[0]);				
-				}	
-			}
-		}
-
-
 </script>
 
 
@@ -83,7 +15,7 @@
 	<%
 
 	EventoDTO evento = (EventoDTO) request.getAttribute(AttributeNames.EVENT);
-	List<UsuarioDTO> usuarios = (List<UsuarioDTO>) request.getAttribute(AttributeNames.USERS);
+	List<UsuarioDTO> asistentes = (List<UsuarioDTO>) request.getAttribute(AttributeNames.ASISTENTES);
 	List<UsuarioEventoPuntuaDTO> puntuaciones = (List<UsuarioEventoPuntuaDTO>) request.getAttribute(AttributeNames.PUNTUACIONES);
 	
 	
@@ -106,11 +38,10 @@
 		                <i class="fas fa-ellipsis-h options"></i>
 			               <div class="dropdown-content">
 				               	<a href="">Compartir</a>
-				               
-				               
-				                <a href="<%=CONTEXT%>/private/evento?action=<%=ActionNames.EVENT_DETAIL%>&<%=ParameterNames.UPDATE%>=<%=ParameterNames.TRUE%>&<%=ParameterNames.ID%>=<%=evento.getId()%>">Editar</a>
-				               
-				               
+				               	<% if (evento.getIdUsuario()==usuario.getId()){%>
+					                <a href="<%=CONTEXT%>/private/evento?action=<%=ActionNames.EVENT_DETAIL%>&<%=ParameterNames.UPDATE%>=<%=ParameterNames.TRUE%>&<%=ParameterNames.ID%>=<%=evento.getId()%>">Editar</a>
+					                <a href="<%=CONTEXT%>/private/evento?action=<%=ActionNames.EVENT_DELETE%>&<%=ParameterNames.ID%>=<%=evento.getId()%>">Eliminar</a>
+				               <%} %>
 				               
 			              </div>
               		  </div>
@@ -153,37 +84,13 @@
                         <label for="tabtwo2">Asistentes</label>
                         <div class="tab">
                             <div class="asistente-tab">
-                            
-                            <!-- AÑADIR  ASISTENTES-->
-                           
-                               <div class="asistente-tab-dentro" id="añadir-usuarios-popup">
-                                    <div class="asistente-pic">
-                                      <img src="<%=CONTEXT%>/css/images/add-user.png" alt="" />
-                                    </div>
-                                    <div class="aisitente-name">
-                                      <span>AÑADIR</span>
-                                    </div>
-                               </div>
                                
-                               <!-- POP UP OCULTO PARA AÑADIR USUARIOS -->
-                               
-                               <div class="añadir-usuarios">
-									<div>
-										<select class="select" id="usuarios" multiple>
-											
-										</select>
-									</div>
-									<div>
-										<select class="select" id="usuariosSeleccionados" multiple>
-										</select>
-									</div>
-									<button class="btn-añadir-usuarios">Añadir</button>
-								</div>
+                    
                            
                             
                             
                             <!--ASISTENTES-->
-                               <% for (UsuarioDTO u : usuarios) { %>
+                               <% for (UsuarioDTO u : asistentes) { %>
                                 <div class="asistente-tab-dentro">
                                   <div class="asistente-pic">
                                     <img src="<%=CONTEXT%>/css/images/profile.jpg" alt="" />
@@ -218,16 +125,18 @@
                              <form action="<%=CONTEXT%>/private/puntuacion" method="post" class="create-valoracion">
                       			<input type="hidden" name="<%=ParameterNames.ACTION%>" value="<%=ActionNames.PUNTUACION_CREATE%>"/>
                       			<input type="hidden" name="<%=ParameterNames.ID%>" value="<%=evento.getId()%>"/>
-	                            <input type="text" class="comment-box" name="<%=ParameterNames.COMENTARIO%>" placeholder="Add a comment"/>
-	                            <select name="<%=ParameterNames.VALORACION%>" class="nada">
-			                          <option value="0">Valoracion  0</option>
-			                          <option value="1">Valoracion  1</option>
-			                          <option value="2">Valoracion  2</option>
-			                          <option value="3">Valoracion  3</option>
-			                          <option value="4">Valoracion  4</option>
-			                          <option value="5">Valoracion  5</option>			                    
-                        		</select>
-	                            <button type="submit"  class="">POST</button>
+                      			<% if (usuario.getId()!=evento.getIdUsuario()){ %>
+                      				<input type="text" class="comment-box" name="<%=ParameterNames.COMENTARIO%>" placeholder="Add a comment"/>
+                      				<select name="<%=ParameterNames.VALORACION%>" class="nada">
+				                          <option value="0">Valoracion  0</option>
+				                          <option value="1">Valoracion  1</option>
+				                          <option value="2">Valoracion  2</option>
+				                          <option value="3">Valoracion  3</option>
+				                          <option value="4">Valoracion  4</option>
+				                          <option value="5">Valoracion  5</option>			                    
+	                        		</select>
+		                            <button type="submit"  class="">POST</button>
+                      			<%  } %>
 	                        </form>
                           </div>
                           
@@ -242,8 +151,6 @@
       </div>
     </section>
 
-<script >$(document).ready(initMostrarAñadir());</script>
-<script >$(document).ready(buscarSeguidosMutuamenteAjax());</script>
 
 
 <%@include file="/common/footer.jsp"%>

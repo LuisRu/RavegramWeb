@@ -14,9 +14,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.gson.Gson;
+import com.luis.ravegram.dao.util.ConfigurationManager;
+import com.luis.ravegram.dao.util.ConfigurationManager;
 import com.luis.ravegram.model.Results;
-import com.luis.ravegram.model.UsuarioCriteria;
 import com.luis.ravegram.model.UsuarioDTO;
+import com.luis.ravegram.model.criteria.UsuarioCriteria;
 import com.luis.ravegram.service.UsuarioService;
 import com.luis.ravegram.service.impl.UsuarioServiceImpl;
 import com.luis.ravegram.web.controller.util.ActionNames;
@@ -29,7 +31,20 @@ import com.luis.ravegram.web.controller.util.SessionManager;
 public class UsuarioWebServiceServlet extends HttpServlet {
 
 	private static Logger logger = LogManager.getLogger(UsuarioWebServiceServlet.class);
-
+	
+	
+	private static final String CFGM_PFX = "controller.";
+    private static final String START_INDEX = CFGM_PFX + "startIndex";
+    private static final String PAGE_COUNT = CFGM_PFX + "pageCount";
+    private static final String PAGE_SIZE_SEARCH_USUARIO = CFGM_PFX + "pageSizeSearchNombre";
+    
+    
+    public static final String WEB_RAVEGRAM_PROPERTIES = "ravegram-config";
+    public static final String WEB_RAVEGRAM_WEB_PROPERTIES = "ravegramWeb-config";
+    
+    private ConfigurationManager cfgM = ConfigurationManager.getInstance();
+	
+	
 	private UsuarioService usuarioService = null;
 	private Gson gson = null; 
 
@@ -47,27 +62,7 @@ public class UsuarioWebServiceServlet extends HttpServlet {
 		String actionStr = request.getParameter(ParameterNames.ACTION);
 
 		// TODO rest style
-		if (ActionNames.USER_SEARCH_FOLLOW_MUTUAL.equals(actionStr)) {
-
-			UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
-
-			try {
-				List<UsuarioDTO> usuarios = usuarioService.findSeguidosMutuamente(usuario.getId());
-				String json = gson.toJson(usuarios);
-
-				response.setContentType("application/json");
-				
-				ServletOutputStream sos = response.getOutputStream();
-				// TODO mimetype
-				sos.write(json.getBytes());
-
-				sos.flush();
-			} catch (Exception e) {
-				logger.error("usuarioId: "+usuario.getId(), e);
-			}								
-
-
-		} else if(ActionNames.USER_SEARCH_FOLLOWER.equals(actionStr)) {
+		 if(ActionNames.USER_SEARCH_FOLLOWER.equals(actionStr)) {
 
 			String idUsuarioStr = request.getParameter(ParameterNames.ID);
 			
@@ -129,14 +124,16 @@ public class UsuarioWebServiceServlet extends HttpServlet {
 			try {
 				Results<UsuarioDTO> results = null;
 				UsuarioCriteria uc = new UsuarioCriteria();
+				
+				//si esta logueado no se encuetra a si mismo
 				if(usuario!=null) {
 					uc.setIdBuscador(usuario.getId());
 				}
 				
 				uc.setBusqueda(buscadorStr);
 				
-				
-				results = usuarioService.findByCriteria(uc, 1, 5);
+				//TODO PAGINACION
+				results = usuarioService.findByCriteria(uc,Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_WEB_PROPERTIES, START_INDEX)) , Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_WEB_PROPERTIES,PAGE_SIZE_SEARCH_USUARIO)));
 			
 				
 				String json = gson.toJson(results.getData());

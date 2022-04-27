@@ -1,4 +1,4 @@
-<%@ page import="java.util.List,com.luis.ravegram.model.*,com.luis.ravegram.web.controller.util.*, com.luis.ravegram.web.controller.*, com.luis.ravegram.web.util.*,java.util.*" %>
+<%@ page import="org.apache.commons.lang3.StringUtils,java.util.List,com.luis.ravegram.model.*,com.luis.ravegram.web.controller.util.*, com.luis.ravegram.web.controller.*, com.luis.ravegram.web.util.*,java.util.*" %>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
  
 <%
@@ -22,7 +22,7 @@
       function buscarUsuariosAjax() {
     	    var buscador = $('#buscador').val();
     	    if (buscador.length>0) {
-            var url = '/Ravegram/usuario-service';
+            var url = '/RavegramWeb/usuario-service';
                 $.ajax({
                    type: "GET",
                    url: url,
@@ -31,7 +31,7 @@
             	$('#buscador-results').empty();
             	$('.resultados-busqueda').show();
                 for (i = 0; i<data.length; i++) {
-                	$('#buscador-results').append('<a href="/Ravegram/private/usuario?action=user-detail&id='+data[i].id+'"><p><b>'+data[i].userName+'</b></p></a>');
+                	$('#buscador-results').append('<a href="/RavegramWeb/private/usuario?action=user-detail&id='+data[i].id+'"><p><b>'+data[i].userName+'</b></p></a>');
                 }
               }
             });
@@ -47,6 +47,7 @@
  	   <%
  	     	    
     	UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
+ 	   
     %>
     
     <% if(usuario==null){ %>
@@ -63,3 +64,6 @@
 
       
     </div>
+    
+    <%@include file="/common/errors.jsp"%>  
+    

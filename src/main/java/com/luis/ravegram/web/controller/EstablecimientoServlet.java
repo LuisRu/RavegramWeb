@@ -1,11 +1,8 @@
 package com.luis.ravegram.web.controller;
 
 import java.io.IOException;
-import java.sql.Date;
-import java.util.List;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,16 +10,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.luis.ravegram.model.Establecimiento;
-import com.luis.ravegram.model.EstablecimientoCriteria;
-import com.luis.ravegram.model.UsuarioCriteria;
+import com.luis.ravegram.model.EstablecimientoDTO;
+import com.luis.ravegram.model.Results;
 import com.luis.ravegram.model.UsuarioDTO;
+import com.luis.ravegram.model.criteria.EstablecimientoCriteria;
 import com.luis.ravegram.service.EstablecimientoService;
 import com.luis.ravegram.service.impl.EstablecimientoServiceImpl;
 import com.luis.ravegram.web.controller.util.ActionNames;
 import com.luis.ravegram.web.controller.util.AttributeNames;
 import com.luis.ravegram.web.controller.util.ParameterNames;
-import com.luis.ravegram.web.controller.util.SessionManager;
 import com.luis.ravegram.web.controller.util.ViewPaths;
 
 /**
@@ -56,13 +52,13 @@ public class EstablecimientoServlet extends HttpServlet {
 			String tipoEstablecimientoStr = request.getParameter(ParameterNames.TIPO_ESTABLECIMIENTO);
 
 			EstablecimientoCriteria ec = new EstablecimientoCriteria();
-			ec.setDistancia(null);
-			ec.setTipoEstablecimiento(null);
-
+			ec.setIdLocalidad(null);
+			ec.setIdTipoEstablecimiento(null);
+			ec.setOrderBy(null);
 
 			try {
-				List<Establecimiento> establecimientos = establecimientoService.findByCriteria(ec, usuario.getLatitud(), usuario.getLongitud());
-				request.setAttribute(AttributeNames.ESTABLECIMIENTOS, establecimientos);
+				Results<EstablecimientoDTO> results = establecimientoService.findByCriteria(ec, 1, 10);
+				request.setAttribute(AttributeNames.ESTABLECIMIENTOS, results.getData());
 
 				targetView=ViewPaths.ESTABLECIMIENTO_RESULT;
 
@@ -75,7 +71,7 @@ public class EstablecimientoServlet extends HttpServlet {
 			String establecimientoIdStr = request.getParameter(ParameterNames.ID);
 
 			try {
-				Establecimiento establecimiento = establecimientoService.findById(Long.valueOf(establecimientoIdStr));
+				EstablecimientoDTO establecimiento = establecimientoService.findById(Long.valueOf(establecimientoIdStr));
 				request.setAttribute(AttributeNames.ESTABLECIMIENTO, establecimiento);
 				targetView = ViewPaths.ESTABLECIMIENTO_DETAIL;
 			}catch(Exception e){

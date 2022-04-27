@@ -3,7 +3,8 @@ package com.luis.ravegram.web.controller.util;
 public class ParameterNames {
 
 	public static final String ACTION = "action";
-	
+	public static final String LATITUD = "latitud";
+	public static final String LONGITUD = "longitud";
 	//USER
 	public static final String USER_NAME ="user-name";
 	public static final String EMAIL ="email";
@@ -19,7 +20,7 @@ public class ParameterNames {
 	public static final String DESCRIPCION = "descripcion";
 	public static final String FECHA_HORA = "fecha-hora";
 	public static final String NUM_ASISENTES = "numero-asistentes";
-	public static final String PUBLIC_PRIV = "public-priv";
+	public static final String ES_PRIVADO = "es-privado";
 	public static final String EDAD_MIN ="edad-min";
 	public static final String EDAD_MAX ="edad-max";
 	public static final String DISTANCIA = "distancia";
@@ -31,6 +32,7 @@ public class ParameterNames {
 	public static final String TIPO_ESTADO_EVENTO ="tipo-estado-evento";
 	public static final String LOCALIDAD ="localidad";
 	public static final String ESTABLECIMIENTO ="establecimiento";
+	public static final String IDS_ASISTENTES ="ids-asistentes";
 	
 	
 	
@@ -41,6 +43,7 @@ public class ParameterNames {
 	
 	public static final String BUSCADOR ="buscador";
 	public static final String UPDATE ="update";
+	public static final String CREATE ="create";
 	public static final String ID = "id";
 	public static final String ID_DOS = "id-dos";
 	public static final String TRUE ="true";

@@ -1,19 +1,16 @@
 package com.luis.ravegram.web.util;
 
 import java.net.URLDecoder;
-
 import java.net.URLEncoder;
-import java.util.HashMap;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
-
-import com.luis.ravegram.web.controller.util.ActionNames;
-import com.luis.ravegram.web.controller.util.ControllerPaths;
-import com.luis.ravegram.web.controller.util.ParameterNames;
 
 public class ParametersUtil {
 
@@ -31,7 +28,7 @@ public class ParametersUtil {
 			sb.append(URLEncoder.encode(pname)).append("=")
 					.append(URLEncoder.encode(parameters.get(pname))).append("&");
 		}
-		return sb.toString();
+		return sb.substring(0, sb.toString().length()-1);
 	}
 	
 	public static final String print(String parameterValue) {
@@ -42,13 +39,55 @@ public class ParametersUtil {
 		}
 	}
 	
-	public static final Integer print(Integer parameterValue) {
-		if (parameterValue==null) {
-			return -1;
+	
+	public static final String printNull(String parameterValue) {
+		if (StringUtils.isEmpty(parameterValue)) {
+			return null;
 		} else {
-			return parameterValue;
+			return parameterValue.trim();
 		}
 	}
+	
+	public static final String print(Long parameterValue) {
+		if (parameterValue ==null) {
+			return Strings.EMPTY;
+		} else {
+			return Long.toString(parameterValue);
+		}
+	}
+	
+
+	
+	public static final String print(Double parameterValue) {
+		if (parameterValue ==null) {
+			return Strings.EMPTY;
+		} else {
+			return Double.toString(parameterValue);
+		}
+	}
+	
+	
+	public static final String print(Integer parameterValue) {
+		if (parameterValue ==null) {
+			return Strings.EMPTY;
+		} else {
+			return Integer.toString(parameterValue);
+		}
+	}
+	
+	
+	
+	public static final String print(Date parameterValue) {
+		if (parameterValue ==null) {
+			return Strings.EMPTY;
+		} else {
+			DateFormat fecha = new SimpleDateFormat("yyyy-MM-dd");
+			return fecha.format(parameterValue);
+		}
+	}
+
+	
+
 	
 
 }
