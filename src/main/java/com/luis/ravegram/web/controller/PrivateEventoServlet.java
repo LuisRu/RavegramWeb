@@ -1,7 +1,6 @@
 package com.luis.ravegram.web.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -12,11 +11,11 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.text.View;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.luis.ravegram.dao.util.ConfigurationManager;
 import com.luis.ravegram.exception.DataException;
 import com.luis.ravegram.exception.EventoNotFoundException;
 import com.luis.ravegram.exception.MailException;
@@ -52,6 +51,16 @@ import com.luis.ravegram.web.util.ValidationUtils;
  */
 @WebServlet("/private/evento")
 public class PrivateEventoServlet extends HttpServlet {
+	
+	private static final String CFGM_PFX = "controller.";
+    private static final String WEB_SERVICE = CFGM_PFX + "eventoUsuario.";
+    private static final String PAGE_SIZE = WEB_SERVICE + "pageSize";
+    private static final String PAGE_COUNT = WEB_SERVICE + "pageCount";
+    
+    public static final String WEB_RAVEGRAM_PROPERTIES = "ravegramWeb-config";
+    
+    ConfigurationManager cfgM = ConfigurationManager.getInstance();
+    
 
 	private static Logger logger = LogManager.getLogger(PrivateEventoServlet.class);
 
@@ -169,7 +178,7 @@ public class PrivateEventoServlet extends HttpServlet {
 			ec.setLongitudBuscador(usuario.getLongitud());
 
 			try {
-				Results<EventoDTO> resultsEvento = eventoService.findByCriteria(ec, 1, 1);
+				Results<EventoDTO> resultsEvento = eventoService.findByCriteria(ec, Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_PROPERTIES, PAGE_SIZE)), Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_PROPERTIES, PAGE_SIZE)));
 				
 				
 				request.setAttribute(AttributeNames.EVENTS, resultsEvento.getData());

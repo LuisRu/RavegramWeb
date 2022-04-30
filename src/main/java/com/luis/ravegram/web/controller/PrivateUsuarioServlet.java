@@ -15,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 
+import com.luis.ravegram.dao.util.ConfigurationManager;
 import com.luis.ravegram.exception.DataException;
 import com.luis.ravegram.exception.UserNotFoundException;
 import com.luis.ravegram.model.EventoDTO;
@@ -49,6 +50,15 @@ import com.luis.ravegram.web.util.WebPaginUtils;
  */
 @WebServlet("/private/usuario")
 public class PrivateUsuarioServlet extends HttpServlet {
+	
+	private static final String CFGM_PFX = "controller.";
+    private static final String WEB_SERVICE = CFGM_PFX + "eventoUsuario.";
+    private static final String PAGE_SIZE = WEB_SERVICE + "pageSize";
+    private static final String PAGE_COUNT = WEB_SERVICE + "pageCount";
+    
+    public static final String WEB_RAVEGRAM_PROPERTIES = "ravegramWeb-config";
+    
+    ConfigurationManager cfgM = ConfigurationManager.getInstance();
 
 	private static Logger logger = LogManager.getLogger(PrivateUsuarioServlet.class);
 
@@ -99,18 +109,18 @@ public class PrivateUsuarioServlet extends HttpServlet {
 			try {
 				Integer currentPage = WebPaginUtils.getCurrentPage(request);
 
-				Results<UsuarioDTO> results = usuarioService.findByCriteria(uc, (currentPage-1)*1+1, 1);
+				Results<UsuarioDTO> results = usuarioService.findByCriteria(uc, (currentPage-1)*Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_PROPERTIES, PAGE_SIZE))+1, Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_PROPERTIES, PAGE_SIZE)));
 				request.setAttribute(AttributeNames.USERS, results.getData());
 				
 
 
 				// Atributos para paginacion
-				Integer totalPages = WebPaginUtils.getTotalPages(results.getTotal(), 1);
+				Integer totalPages = WebPaginUtils.getTotalPages(results.getTotal(), Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_PROPERTIES, PAGE_SIZE)));
 				request.setAttribute(AttributeNames.TOTAL_PAGES, totalPages);
 				request.setAttribute(AttributeNames.CURRENT_PAGE, currentPage);
 				//el 1 es el numero de paginas q 
-				request.setAttribute(AttributeNames.PAGING_FROM, WebPaginUtils.getPageFrom(currentPage, 1, totalPages));
-				request.setAttribute(AttributeNames.PAGING_TO, WebPaginUtils.getPageTo(currentPage, 1, totalPages));
+				request.setAttribute(AttributeNames.PAGING_FROM, WebPaginUtils.getPageFrom(currentPage, Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_PROPERTIES, PAGE_COUNT)), totalPages));
+				request.setAttribute(AttributeNames.PAGING_TO, WebPaginUtils.getPageTo(currentPage, Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_PROPERTIES, PAGE_COUNT)), totalPages));
 
 
 				targetView = ViewPaths.USER_RESULT;

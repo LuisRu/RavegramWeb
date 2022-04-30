@@ -1,9 +1,7 @@
 package com.luis.ravegram.web.controller;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -13,38 +11,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.util.Strings;
 
+import com.luis.ravegram.dao.util.ConfigurationManager;
 import com.luis.ravegram.exception.DataException;
-import com.luis.ravegram.exception.UserNotFoundException;
 import com.luis.ravegram.model.EstablecimientoDTO;
-import com.luis.ravegram.model.EventoDTO;
 import com.luis.ravegram.model.Results;
-import com.luis.ravegram.model.UsuarioDTO;
-import com.luis.ravegram.model.UsuarioEventoPuntuaDTO;
 import com.luis.ravegram.model.criteria.EstablecimientoCriteria;
-import com.luis.ravegram.model.criteria.EventoCriteria;
-import com.luis.ravegram.model.criteria.UsuarioCriteria;
-import com.luis.ravegram.model.state.EventoEstado;
 import com.luis.ravegram.service.EstablecimientoService;
-import com.luis.ravegram.service.EventoService;
-import com.luis.ravegram.service.PuntuacionService;
-import com.luis.ravegram.service.UsuarioService;
-import com.luis.ravegram.service.UsuarioSigueService;
 import com.luis.ravegram.service.impl.EstablecimientoServiceImpl;
-import com.luis.ravegram.service.impl.EventoServiceImpl;
-import com.luis.ravegram.service.impl.PuntuacionServiceImpl;
-import com.luis.ravegram.service.impl.UsuarioServiceImpl;
-import com.luis.ravegram.service.impl.UsuarioSigueServiceImpl;
 import com.luis.ravegram.web.controller.util.ActionNames;
 import com.luis.ravegram.web.controller.util.AttributeNames;
-import com.luis.ravegram.web.controller.util.ControllerPaths;
-import com.luis.ravegram.web.controller.util.CookieManager;
 import com.luis.ravegram.web.controller.util.ErrorsNames;
 import com.luis.ravegram.web.controller.util.ParameterNames;
-import com.luis.ravegram.web.controller.util.SessionManager;
 import com.luis.ravegram.web.controller.util.ViewPaths;
-import com.luis.ravegram.web.util.ParametersUtil;
 import com.luis.ravegram.web.util.ValidationUtils;
 import com.luis.ravegram.web.util.WebPaginUtils;
 
@@ -53,6 +32,17 @@ import com.luis.ravegram.web.util.WebPaginUtils;
  */
 @WebServlet("/private/establecimiento")
 public class PrivateEstablecimientoServlet extends HttpServlet {
+	
+	
+	
+	private static final String CFGM_PFX = "controller.";
+    private static final String WEB_SERVICE = CFGM_PFX + "establecimiento.";
+    private static final String PAGE_SIZE = WEB_SERVICE + "pageSize";
+    private static final String PAGE_COUNT = WEB_SERVICE + "pageCount";
+    
+    public static final String WEB_RAVEGRAM_PROPERTIES = "ravegramWeb-config";
+    
+    ConfigurationManager cfgM = ConfigurationManager.getInstance();
 
 	private static Logger logger = LogManager.getLogger(PrivateEstablecimientoServlet.class);
 
@@ -96,17 +86,17 @@ public class PrivateEstablecimientoServlet extends HttpServlet {
 				Integer currentPage = WebPaginUtils.getCurrentPage(request);
 				
 
-				Results<EstablecimientoDTO> results = establecimientoService.findByCriteria(ec,(currentPage-1)*5+1, 5);
+				Results<EstablecimientoDTO> results = establecimientoService.findByCriteria(ec,(currentPage-1)*Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_PROPERTIES, PAGE_SIZE)) +1, Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_PROPERTIES, PAGE_SIZE)));
 				request.setAttribute(AttributeNames.ESTABLECIMIENTOS, results.getData());
 
 
 				// Atributos para paginacion
-				Integer totalPages = WebPaginUtils.getTotalPages(results.getTotal(), 5);
+				Integer totalPages = WebPaginUtils.getTotalPages(results.getTotal(), Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_PROPERTIES, PAGE_SIZE)));
 				request.setAttribute(AttributeNames.TOTAL_PAGES, totalPages);
 				request.setAttribute(AttributeNames.CURRENT_PAGE, currentPage);
 				//el 3 son las paginas de abajo
-				request.setAttribute(AttributeNames.PAGING_FROM, WebPaginUtils.getPageFrom(currentPage,3, totalPages));
-				request.setAttribute(AttributeNames.PAGING_TO, WebPaginUtils.getPageTo(currentPage, 3, totalPages));
+				request.setAttribute(AttributeNames.PAGING_FROM, WebPaginUtils.getPageFrom(currentPage,Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_PROPERTIES, PAGE_COUNT)), totalPages));
+				request.setAttribute(AttributeNames.PAGING_TO, WebPaginUtils.getPageTo(currentPage, Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_PROPERTIES, PAGE_COUNT)), totalPages));
 
 
 				// Dirigir a...
