@@ -21,6 +21,8 @@
 		tipoEstablecimiento=null;
 	}
 	
+
+	String idEvento = evento==null?request.getParameter(ParameterNames.ID):evento.getId().toString();
 	
 	%>
 
@@ -157,6 +159,40 @@
 	          });
 	      }
 
+	      
+	      function buscarFollowersNoAceptados() {
+	          var url = "/RavegramWeb/usuario-service";
+	              $.ajax({
+	                 type: "GET",
+	                 url: url,
+	             data: "action=user-follower-not-accept&id-dos="+<%=usuario.getId()%>+"&id="+<%=idEvento%>,
+	             success: function(data) {
+	          	$('#usuarios').empty();
+	              for (i = 0; i<data.length; i++) {
+	              	$('#usuarios').append('<option selected value="'+data[i].id+'">'+data[i].userName+'</option>');
+	              	 
+	              }
+	            }
+	          });
+	              
+	      }
+	      
+	      function buscarAsistentesAjax() {
+	          var url = "/RavegramWeb/usuario-service";
+	              $.ajax({
+	                 type: "GET",
+	                 url: url,
+	             data: "action=user-searcher-assistants&id="+<%=idEvento%>,
+	             success: function(data) {
+	          	$('#usuariosSeleccionados').empty();
+	              for (i = 0; i<data.length; i++) {
+	              	$('#usuariosSeleccionados').append('<option selected value="'+data[i].id+'">'+data[i].userName+'</option>');
+	              	 
+	              }
+	            }
+	          });
+	              
+	      }
 
 
 </script>
@@ -170,6 +206,7 @@
  <form action="<%=CONTEXT%>/private/evento" method="post">
 	<input type="hidden" name="<%=ParameterNames.ACTION%>" value="<%=ActionNames.EVENT_UPDATE%>"/>
 	<input type="hidden" name="<%=ParameterNames.ID%>" value="<%=evento==null?request.getParameter(ParameterNames.ID):evento.getId()%>"/>
+	<input type="hidden" name="<%=ParameterNames.TIPO_ESTADO_EVENTO%>" value="<%=evento==null?request.getParameter(ParameterNames.TIPO_ESTADO_EVENTO):evento.getIdTipoEstadoEvento()%>"/>
 	            
      <section class="main-detail">
       <div class="wrapper">
@@ -436,6 +473,8 @@
 <script >$(document).ready(buscarTipoTematicaAjax());</script>
 <script >$(document).ready(buscarTipoMusicaAjax());</script>
 <script >$(document).ready(buscarTipoEstablecimientoAjax());</script>
+<script >$(document).ready(buscarAsistentesAjax());</script>
+<script >$(document).ready(buscarFollowersNoAceptados());</script>
 
 
 

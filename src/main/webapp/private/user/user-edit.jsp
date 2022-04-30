@@ -4,7 +4,7 @@
         <div class="left-col">
           <h3>Actualizar perfil</h3>
 
-          <form action="<%=CONTEXT%>/private/usuario" method="post">
+          <form autocomplete="off" action="<%=CONTEXT%>/private/usuario" method="post">
 	            <input type="hidden" name="action" value="<%=ActionNames.USER_UPDATE%>"/>
 	            
 	            <!-- SUBIR FOTO
@@ -42,9 +42,24 @@
                   	%>
 	            </div>
 	            
+	            
+	             <!-- TELEFONO -->
+	            <div class="mb-3">
+	              <label for="username" class="form-label">Telefono</label>
+	              <input type="text" class="form-control" name="<%=ParameterNames.TELEFONO%>" value="<%=ParametersUtil.print(usuario.getTelefono())%>" id="telefono" />
+	                 <%
+                  		parameterError = errors.getParameterError(ParameterNames.TELEFONO);
+                  		if (parameterError!=null) {
+                  		%>
+                  			<p><%=parameterError%></p>
+                  	<%
+                  		}
+                  	%>
+	            </div>
+	            
 	            <!-- FECHA NACIMIENTO -->
 	            <div class="mb-3">
-	              <label for="fechanacimiento" class="form-label">Fecha Nacimiento</label>
+	              <label for="fechanacimiento" class="form-label">Fecha Nacimiento</label><br>
 	              <input type="date" name="<%=ParameterNames.FECHA_NACIMIENTO%>" value="<%=ParametersUtil.print(usuario.getFechaNacimiento())%>" required />
                       <%
                   		parameterError = errors.getParameterError(ParameterNames.FECHA_NACIMIENTO);

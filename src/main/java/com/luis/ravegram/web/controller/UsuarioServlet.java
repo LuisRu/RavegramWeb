@@ -107,7 +107,13 @@ public class UsuarioServlet extends HttpServlet {
 					ec.setLatitudBuscador(22.343430D);
 					ec.setLongitudBuscador(22.000000D);
 				}
+				
+				//eventos disponibles
 				Results<EventoDTO> resultsEventosDisponibles = eventoService.findByCriteria(ec, 1, 10);
+				
+				//eventos finalizados
+				ec.setTipoEstadoEvento(EventoEstado.FINALIZADO);
+				Results<EventoDTO> resultsHistorialResultados = eventoService.findByCriteria(ec, 1, 10);
 				
 				
 				//buscamos sus valoraciones
@@ -115,6 +121,7 @@ public class UsuarioServlet extends HttpServlet {
 
 				request.setAttribute(AttributeNames.USER, usuarioBusqueda);
 				request.setAttribute(AttributeNames.EVENTS, resultsEventosDisponibles.getData());
+				request.setAttribute(AttributeNames.EVENTS_DISPO, resultsHistorialResultados.getData());
 				request.setAttribute(AttributeNames.PUNTUACIONES, resultsPuntuaciones.getData());
 				request.setAttribute(AttributeNames.ID, idUsuario);
 				
@@ -165,6 +172,8 @@ public class UsuarioServlet extends HttpServlet {
 				logger.error("Login: "+emailStr,de.getMessage(), de);
 				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
 			} 
+			
+			
 
 		} else if (ActionNames.USER_CREATE.equalsIgnoreCase(actionName)) {
 
@@ -176,11 +185,11 @@ public class UsuarioServlet extends HttpServlet {
 			usuario.setUserName(ValidationUtils.userName(errors,ParameterNames.USER_NAME));
 			usuario.setEmail(ValidationUtils.email(errors, ParameterNames.EMAIL));
 			usuario.setContrasena(ValidationUtils.contrasena(errors, ParameterNames.PASSWORD,false));
-			usuario.setFechaNacimiento(ValidationUtils.fecha(errors, ParameterNames.FECHA_NACIMIENTO));
+			usuario.setFechaNacimiento(ValidationUtils.fechaMayorEdad(errors, ParameterNames.FECHA_NACIMIENTO));
 			usuario.setSexo(ValidationUtils.sexo(errors, ParameterNames.SEXO));
 			usuario.setTelefono(ValidationUtils.telefono(errors, ParameterNames.TELEFONO));
 			usuario.setBiografia(ValidationUtils.biografia(errors, ParameterNames.BIOGRAFIA));
-			//TODO
+			//TODO provisionalmente se le pone esta
 			usuario.setLatitud(22.00000D);
 			usuario.setLongitud(22.000000D);
 

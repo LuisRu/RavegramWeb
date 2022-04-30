@@ -190,12 +190,12 @@ function buscarFollowersAjax() {
 			                             <div class="informacion-tab" style="height: 100%">
 		
 					 							 <!-- FECHA HORA -->
-			                                    <div class="informacion-tab-dentro">
+			                                    <div  style="margin-bottom: 14px;" class="informacion-tab-dentro">
 			                                   		 <%
 							                  			parameterError = errors.getParameterError(ParameterNames.FECHA_HORA);
 							                  			if (parameterError!=null) {
 								                  		%>
-								                  				<span><%=parameterError%></span>
+								                  				<span style="font-size:17px"><%=parameterError%></span>
 									                  	<%
 									                  		}
 									                  	%>
@@ -210,7 +210,7 @@ function buscarFollowersAjax() {
 							                  			parameterError = errors.getParameterError(ParameterNames.TIPO_TEMATICA);
 							                  			if (parameterError!=null) {
 								                  		%>
-								                  				<span><%=parameterError%></span>
+								                  				<span style="font-size:17px"><%=parameterError%></span>
 									                  	<%
 									                  		}
 									                  	%>
@@ -227,7 +227,7 @@ function buscarFollowersAjax() {
 							                  			parameterError = errors.getParameterError(ParameterNames.TIPO_ESTABLECIMIENTO);
 							                  			if (parameterError!=null) {
 								                  		%>
-								                  				<span><%=parameterError%></span>
+								                  				<span style="font-size:17px" ><%=parameterError%></span>
 									                  	<%
 									                  		}
 									                  	%>
@@ -244,7 +244,7 @@ function buscarFollowersAjax() {
 							                  			parameterError = errors.getParameterError(ParameterNames.TIPO_MUSICA);
 							                  			if (parameterError!=null) {
 								                  		%>
-								                  				<span><%=parameterError%></span>
+								                  				<span style="font-size:17px"><%=parameterError%></span>
 									                  	<%
 									                  		}
 									                  	%>
@@ -261,7 +261,7 @@ function buscarFollowersAjax() {
 							                  			parameterError = errors.getParameterError(ParameterNames.ES_PRIVADO);
 							                  			if (parameterError!=null) {
 								                  		%>
-								                  				<span><%=parameterError%></span>
+								                  				<span style="font-size:17px"><%=parameterError%></span>
 									                  	<%
 									                  		}
 									                  	%>
@@ -286,7 +286,7 @@ function buscarFollowersAjax() {
 							                  			parameterError = errors.getParameterError(ParameterNames.CALLE);
 							                  			if (parameterError!=null) {
 								                  		%>
-								                  				<span><%=parameterError%></span>
+								                  				<span style="font-size:17px"><%=parameterError%></span>
 									                  	<%
 									                  		}
 									                  	%>
@@ -301,7 +301,7 @@ function buscarFollowersAjax() {
 							                  			parameterError = errors.getParameterError(ParameterNames.NUM_ASISENTES);
 							                  			if (parameterError!=null) {
 								                  		%>
-								                  				<span><%=parameterError%></span>
+								                  				<span style="font-size:17px"><%=parameterError%></span>
 									                  	<%
 									                  		}
 									                  	%>
@@ -316,7 +316,7 @@ function buscarFollowersAjax() {
 							                  			parameterError = errors.getParameterError(ParameterNames.LATITUD);
 							                  			if (parameterError!=null) {
 								                  		%>
-								                  				<span><%=parameterError%></span>
+								                  				<span style="font-size:17px"><%=parameterError%></span>
 									                  	<%
 									                  		}
 									                  	%>
@@ -324,7 +324,7 @@ function buscarFollowersAjax() {
 							                  			parameterError = errors.getParameterError(ParameterNames.LONGITUD);
 							                  			if (parameterError!=null) {
 								                  		%>
-								                  				<span><%=parameterError%></span>
+								                  				<span style="font-size:17px"><%=parameterError%></span>
 									                  	<%
 									                  		}
 									                  	%>
@@ -335,7 +335,7 @@ function buscarFollowersAjax() {
 			                                  </div>
 			                                  
 			                                  <!-- TITULO -->
-			                                  <input style="width: 100%; text-align: center; border: 1px solid;" name="<%=ParameterNames.NOMBRE_EVENTO%>" value="<%=ParametersUtil.print(request.getParameter(ParameterNames.NOMBRE_EVENTO))%>" placeholder="Titulo evento">
+			                                  <input style="width: 100%; text-align: center; border: 1px solid; margin-top: 52px" name="<%=ParameterNames.NOMBRE_EVENTO%>" value="<%=ParametersUtil.print(request.getParameter(ParameterNames.NOMBRE_EVENTO))%>" placeholder="Titulo evento">
 			                                  			<%
 							                  			parameterError = errors.getParameterError(ParameterNames.NOMBRE_EVENTO);
 							                  			if (parameterError!=null) {

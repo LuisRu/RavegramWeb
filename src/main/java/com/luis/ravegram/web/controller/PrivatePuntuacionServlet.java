@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.luis.ravegram.exception.DataException;
 import com.luis.ravegram.model.UsuarioDTO;
 import com.luis.ravegram.model.UsuarioEventoPuntuaDTO;
 import com.luis.ravegram.service.PuntuacionService;
@@ -20,10 +21,12 @@ import com.luis.ravegram.service.impl.PuntuacionServiceImpl;
 import com.luis.ravegram.web.controller.util.ActionNames;
 import com.luis.ravegram.web.controller.util.AttributeNames;
 import com.luis.ravegram.web.controller.util.ControllerPaths;
+import com.luis.ravegram.web.controller.util.ErrorsNames;
 import com.luis.ravegram.web.controller.util.ParameterNames;
 import com.luis.ravegram.web.controller.util.SessionManager;
 import com.luis.ravegram.web.controller.util.ViewPaths;
 import com.luis.ravegram.web.util.ParametersUtil;
+import com.luis.ravegram.web.util.ValidationUtils;
 
 /**
  * Controlador (Servlet) para peteciones de eventos que 
@@ -51,44 +54,46 @@ public class PrivatePuntuacionServlet extends HttpServlet {
 		Errors errors = new Errors();
 		request.setAttribute(AttributeNames.ERRORS, errors);
 		
+		Map<String, String[]> mapParameter = request.getParameterMap();
+		ValidationUtils.setMapParameter(mapParameter);
+		
 		String actionName = request.getParameter(ParameterNames.ACTION);
 
 		if (logger.isInfoEnabled()) {
 			logger.info("Processing action "+actionName);
 		}
 		
+		
 		if (ActionNames.PUNTUACION_CREATE.equalsIgnoreCase(actionName)) {
 			//VISTA EN DETALLE
+			targetView=ViewPaths.HOME;
 			
 			UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
 			
-			String comentarioStr = request.getParameter(ParameterNames.COMENTARIO);
-			String valoracionStr = request.getParameter(ParameterNames.VALORACION);
-			String idEventoStr = request.getParameter(ParameterNames.ID);
+			
+			UsuarioEventoPuntuaDTO puntuacion = new UsuarioEventoPuntuaDTO();
+			puntuacion.setValoracion(ValidationUtils.integerValidator(errors, ParameterNames.VALORACION, 0, 5, true));
+			puntuacion.setComentario(request.getParameter(ParameterNames.COMENTARIO));
+			puntuacion.setIdUsuario(usuario.getId());
+			puntuacion.setIdEvento(ValidationUtils.longTransform(errors, request.getParameter(ParameterNames.ID)));
 			
 			
 			Map<String, String> userDetailParams = new HashMap<String, String>();
 			userDetailParams.put(ParameterNames.ACTION, ActionNames.EVENT_DETAIL);
-			userDetailParams.put(ParameterNames.ID, idEventoStr);
+			userDetailParams.put(ParameterNames.ID, puntuacion.getIdEvento().toString());
 			
-
-			targetView = ParametersUtil.getURL(ControllerPaths.USER, userDetailParams); 
+			targetView = ParametersUtil.getURL(ControllerPaths.PRIVATE_EVENTO, userDetailParams); 
 			forward = false;
 
 			
 			try {
-				UsuarioEventoPuntuaDTO puntuacion = new UsuarioEventoPuntuaDTO();
-				
-				puntuacion.setValoracion(Integer.valueOf(valoracionStr));
-				puntuacion.setComentario(comentarioStr);
-				puntuacion.setIdUsuario(usuario.getId());
-				puntuacion.setIdEvento(Long.valueOf(idEventoStr));
 				
 				puntuacionesService.create(puntuacion);
 			
-			} catch (Exception e) {
-				logger.error("Detail: ",e.getMessage(),e);
-			}			
+			} catch (DataException de) {
+				logger.error("EventDetail: ", de.getMessage(), de);
+				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
+			}		
 
 			
 			

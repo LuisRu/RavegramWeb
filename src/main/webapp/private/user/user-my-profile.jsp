@@ -15,15 +15,15 @@
 	    });
 	}
 	
-	function initOcularFollowers(){
-	    $('#followers').click(function(){
-	    	if ($('.followers').is(':hidden'))
-	    		   $('.followers').show();
-	    		else
-	    		   $('.followers').hide();
-	    	
-	    });
+    function initOcultarFollow(){
+    	$('#close-x-followers').click(function(){
+    		$('.followers').hide();
+    	});
+    	$('#close-x-following').click(function(){
+    		$('.following').hide();
+    	});
 	}
+
 	
 	
 	function initMostrarFollowing(){
@@ -88,6 +88,7 @@
 <%
 	
     List<EventoDTO> eventosDisponibles = (List<EventoDTO>) request.getAttribute(AttributeNames.EVENTS);
+	List<EventoDTO> eventosHistorial = (List<EventoDTO>) request.getAttribute(AttributeNames.EVENTS_DISPO);
     List<UsuarioEventoPuntuaDTO> puntuaciones = (List<UsuarioEventoPuntuaDTO>) request.getAttribute(AttributeNames.PUNTUACIONES);
 		
 		
@@ -97,14 +98,14 @@
 
 
  <div  id="followers-div" class="followers">
-      <p style="font-size: 28px;  background-color: white; border-radius: 20px;">Followers<span  onclick="initOcularFollowers()" id="close-x" class="cerrar-x">x</span></p>
+      <p style="font-size: 28px;  background-color: white; border-radius: 20px;">Followers<span   id="close-x-followers" class="cerrar-x">x</span></p>
       <div id="div-followers" class="dentro-followers"> 
         
       </div>
     </div>
 
     <div  id="following-div" class="following">
-      <p style="font-size: 28px;  background-color: white; border-radius: 20px;">Following<span onclick="initOcultarFollowing()" id="close-x" class="cerrar-x">x</span></p>
+      <p style="font-size: 28px;  background-color: white; border-radius: 20px;">Following<span id="close-x-following" class="cerrar-x">x</span></p>
       <div id="div-following" class="dentro-following"> 
         
       </div>
@@ -159,7 +160,6 @@
 			        <div class="left-col">
 			          <div class="post-filtros">
 			            <div class="tabs">
-			
 			              <!-- EVENTOS DISPONIBLES -->
 			              <input type="radio" name="tabs" id="tabone" checked="checked">
 			              <label for="tabone">Evento Disponibles</label>
@@ -169,7 +169,6 @@
                  					  <div class="profile-container">
 								    
 								 		  <% for (EventoDTO e : eventosDisponibles) { %>
-								 		  
 								 		  	 <a href="<%=CONTEXT%>/private/evento?action=<%=ActionNames.EVENT_DETAIL%>&<%=ParameterNames.ID%>=<%=e.getId()%>">
 										        <div class="post-profile">
 											      	<div class="post-profile-foto">
@@ -181,35 +180,110 @@
 											        		<%=e.getDescripcion() %>
 											        	</span>
 												        <div class="post-profile-iconos">
-												          <i class="icon fas fa-calendar"><%=e.getFechaHora()%></i>
-												          <i class="icon fas fa-mask"><%=e.getTipoTematica()%></i>
-												          <i class="icon fas fa-hotel"><%=e.getTipoEstablecimiento()%></i>
-												          <i class="icon fas fa-hotel"><%=e.getEstablecimiento()%></i>
-												          <i class="icon fas fa-music"><%=e.getTipoMusica()%></i>
-												          <i class="icon fas fa-unlock"><%=e.getPublicoPrivado()%></i>
-												          <i class="icon fas fa-users"><%=e.getNumAsistentes()%></i>
-												          <i class="icon fas fa-location-arrow"><%=e.getDistanciaKm()%></i>
-												          <p style="margin-top: 8px; font-size: 18px"><%=e.getCalle()%></p>
+												          <i style="font-size: 20px;" class="icon fas fa-calendar"><%=e.getFechaHora()%></i>
+												          
+												          <%if(e.getTipoTematica()!=null) {%>
+												          	<i style="font-size: 20px;" class="icon fas fa-mask"><%=e.getTipoTematica()%></i>
+												          <%} %>
+												          
+												          <i style="font-size: 20px;" class="icon fas fa-hotel"><%=e.getTipoEstablecimiento()%></i>
+												          
+												          <%if(e.getEstablecimiento()!=null) {%>
+												          <i style="font-size: 20px;" class="icon fas fa-hotel"><%=e.getEstablecimiento()%></i>
+												          <%} %>
+												          
+												          <%if(e.getTipoMusica()!=null) {%>
+												          <i style="font-size: 20px;" class="icon fas fa-music"><%=e.getTipoMusica()%></i>
+												          <%} %>
+												          
+												          <%if(e.getPublicoPrivado()==true) {%>
+												          	<i style="font-size: 20px;" class="icon fas fa-lock"></i>
+												          <%}else if(e.getPublicoPrivado()==false){ %>
+												          	<i style="font-size: 20px;" class="icon fas fa-unlock"></i>
+												          <%} %>
+												          
+												          <i style="font-size: 20px;" class="icon fas fa-road"><%=e.getCalle()%></i>
+												          
+												          <%if(e.getNumAsistentes()!=null||e.getNumAsistentes()!=0){ %>
+												          <i style="font-size: 20px;" class="icon fas fa-users"><%=e.getNumAsistentes()%></i>
+												          <%} %>
+												          
+												          <i style="font-size: 20px;" class="icon fas fa-location-arrow"><%=Math.round(e.getDistanciaKm())%>KM</i>
+												          
 												        </div>
 											         </div>  	
 											       </div>
 											  </a>
-											  
-											  
 									       <%} %>
 									       
 									    </div>
                 					</main>
 				
 			              </div>
-			
-			
-			               <!--  Historial -->
-			              <input type="radio" name="tabs" id="tabtwo">
-			              <label for="tabtwo">Historial</label>
-			              <div class="tab">
+
+				
 			              
 			
+			
+			                <!--  Historial -->
+			              <input type="radio" name="tabs" id="tabtwo">
+			              <label for="tabtwo">Historial</label>
+			                         <div class="tab">
+								    
+								    <main>
+                 					  <div class="profile-container">
+								    
+								 		  <% for (EventoDTO e : eventosHistorial) { %>
+								 		  	 <a href="<%=CONTEXT%>/private/evento?action=<%=ActionNames.EVENT_DETAIL%>&<%=ParameterNames.ID%>=<%=e.getId()%>">
+										        <div class="post-profile">
+											      	<div class="post-profile-foto">
+											        	<img src="<%=CONTEXT%>/css/images/profile.jpg">
+											      	</div>
+											      	<div class="post-profile-info">
+											        	<h3><%=e.getNombre()%></h3>
+											        	<span style="font-size: 16px;">
+											        		<%=e.getDescripcion() %>
+											        	</span>
+												        <div class="post-profile-iconos">
+												          <i style="font-size: 20px;" class="icon fas fa-calendar"><%=e.getFechaHora()%></i>
+												          
+												          <%if(e.getTipoTematica()!=null){ %>
+												          	<i style="font-size: 20px;" class="icon fas fa-mask"><%=e.getTipoTematica()%></i>
+												          <%} %>
+												          
+												          <i style="font-size: 20px;" class="icon fas fa-hotel"><%=e.getTipoEstablecimiento()%></i>
+												          
+												          <%if(e.getEstablecimiento()!=null) {%>
+												          <i style="font-size: 20px;" class="icon fas fa-hotel"><%=e.getEstablecimiento()%></i>
+												          <%} %>
+												          
+												          <%if(e.getTipoMusica()!=null) {%>
+												          <i style="font-size: 20px;" class="icon fas fa-music"><%=e.getTipoMusica()%></i>
+												          <%} %>
+												          
+												          <%if(e.getPublicoPrivado()==true) {%>
+												          	<i style="font-size: 20px;" class="icon fas fa-lock"></i>
+												          <%}else if(e.getPublicoPrivado()==false){ %>
+												          	<i style="font-size: 20px;" class="icon fas fa-unlock"></i>
+												          <%} %>
+												          
+												          <i style="font-size: 20px;" class="icon fas fa-road"><%=e.getCalle()%></i>
+												          
+												          <%if(e.getNumAsistentes()!=null||e.getNumAsistentes()!=0){ %>
+												          <i style="font-size: 20px;" class="icon fas fa-users"><%=e.getNumAsistentes()%></i>
+												          <%} %>
+												          
+												          <i style="font-size: 20px;" class="icon fas fa-location-arrow"><%=Math.round(e.getDistanciaKm())%>KM</i>
+												          
+												        </div>
+											         </div>  	
+											       </div>
+											  </a>
+									       <%} %>
+									       
+									    </div>
+                					</main>
+				
 			              </div>
 			            
 			            
@@ -263,7 +337,7 @@
 
     
         
-
+<script >$(document).ready(initOcultarFollow());</script>
 <script >$(document).ready(initMostrarFollowers());</script>
 <script >$(document).ready(initMostrarFollowing());</script>
 <script >$(document).ready(buscarFollowersAjax());</script>

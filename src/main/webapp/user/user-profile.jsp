@@ -7,6 +7,7 @@
 
 	function initMostrarFollowers(){
 	    $('#followers').click(function(){
+	    	buscarFollowersAjax();
 	    	if ($('.followers').is(':hidden'))
 	    		   $('.followers').show();
 	    		else
@@ -15,19 +16,10 @@
 	    });
 	}
 	
-	function initOcularFollowers(){
-	    $('#followers').click(function(){
-	    	if ($('.followers').is(':hidden'))
-	    		   $('.followers').show();
-	    		else
-	    		   $('.followers').hide();
-	    	
-	    });
-	}
-	
-    
+
     function initMostrarFollowing(){
         $('#following').click(function(){
+        	buscarFollowingAjax();
         	if ($('.following').is(':hidden'))
         		   $('.following').show();
         		else
@@ -36,15 +28,16 @@
         }); 
     }
     
-    function initOcultarFollowing(){
-        $('#following').click(function(){
-        	if ($('.following').is(':hidden'))
-        		   $('.following').show();
-        		else
-        		   $('.following').hide();
-        	
-        }); 
-    }
+    
+    function initOcultarFollow(){
+    	$('#close-x-followers').click(function(){
+    		$('.followers').hide();
+    	});
+    	$('#close-x-following').click(function(){
+    		$('.following').hide();
+    	});
+	}
+
     
     
     function buscarFollowersAjax() {
@@ -74,12 +67,49 @@
            success: function(data) {
         	$('#div-following').empty();
             for (i = 0; i<data.length; i++) {
-            	$('#div-following').append('<p class="nombre-usuarios">'+data[i].userName+'</p>');
+            	$('#div-following').append('<a href="/RavegramWeb/usuario?action=user-detail&id='+data[i].id+'"><p class="nombre-usuarios">'+data[i].userName+'</p></a>');
             }
           }
         });
             
     }
+    
+    
+    
+    function follow() {
+        var url = "/RavegramWeb/usuario-service";
+            $.ajax({
+               type: "GET",
+               url: url,
+           data: "action=user-follow&id="+<%=request.getParameter(ParameterNames.ID)%>,
+           success: function(data) {
+        	if(data=="OK"){
+        		$('#follow').remove();
+        		$('#div-follow').append('<button onclick="unFollow()" type="submit" class="unfollow-btn-user-profile" id="unFollow"> UNFOLLOW </button>');
+        	 }
+          }
+        });
+            
+    }
+    
+    
+    function unFollow() {
+        var url = "/RavegramWeb/usuario-service";
+            $.ajax({
+               type: "GET",
+               url: url,
+           data: "action=user-unfollow&id="+<%=request.getParameter(ParameterNames.ID)%>,
+           success: function(data) {
+        	if(data=="OK"){
+        		$('#unFollow').remove();
+        		$('#div-follow').append('<button onclick="follow()" type="submit" class="follow-btn-user-profile" id="follow"> FOLLOW </button>');
+        	}
+          }
+        });
+            
+    }
+    
+    
 
         
 </script>
@@ -95,6 +125,7 @@
 	
 	UsuarioDTO usuarioDetail = (UsuarioDTO) request.getAttribute(AttributeNames.USER);
     List<EventoDTO> eventosDisponibles = (List<EventoDTO>) request.getAttribute(AttributeNames.EVENTS);
+    List<EventoDTO> eventosHistorial = (List<EventoDTO>) request.getAttribute(AttributeNames.EVENTS_DISPO);
     List<UsuarioEventoPuntuaDTO> puntuaciones = (List<UsuarioEventoPuntuaDTO>) request.getAttribute(AttributeNames.PUNTUACIONES);
     
    
@@ -105,18 +136,20 @@
 %>
 
 
- <div  id="followers-div" class="followers">
-      <p style="font-size: 28px;  background-color: white; border-radius: 20px;">Followers<span  onclick="initOcularFollowers()" id="close-x" class="cerrar-x">x</span></p>
-      <div id="div-followers" class="dentro-followers"> 
-        
-      </div>
+	 <div  id="followers-div" class="followers">
+	      <p style="font-size: 28px;  background-color: white; border-radius: 20px;">Followers<span  id="close-x-followers" class="cerrar-x">x</span></p>
+	      <div id="div-followers" class="dentro-followers"> 
+	        
+	      </div>
     </div>
 
+
+
     <div  id="following-div" class="following">
-      <p style="font-size: 28px;  background-color: white; border-radius: 20px;">Following<span onclick="initOcultarFollowing()" id="close-x" class="cerrar-x">x</span></p>
-      <div id="div-following" class="dentro-following"> 
-        
-      </div>
+      <p style="font-size: 28px;  background-color: white; border-radius: 20px;">Following<span  id="close-x-following" class="cerrar-x">x</span></p>
+	      <div id="div-following" class="dentro-following"> 
+	        
+	      </div>
     </div>
 
 
@@ -139,31 +172,24 @@
               <li id="following"><span class="profile-stat-count"></span> FOLLOWING</li>
             </ul>
             
- 			<% if (usuario==null){ %>
- 			
- 				<!-- BOTON FOLLOW -->
-			  	<a href="<%=CONTEXT%>/user/user-create.jsp">
-              		<button type="submit" class="follow-btn-user-profile"> FOLLOW </button>
-            	 </a>
-            	 
- 			<%}else{ %>	
- 					
+ 			<% if (usuario!=null){ %>
+ 			  <div id="div-follow">
 				<%if(!idsSeguidos.contains(idUsuario)){ %>
 				
-				<!-- BOTON FOLLOW -->
-			  	<a href="<%=CONTEXT%>/private/usuario?action=<%=ActionNames.USER_FOLLOW%>&<%=ParameterNames.ID%>=<%=idUsuario%>">
-              		<button type="submit" class="follow-btn-user-profile"> FOLLOW </button>
-            	 </a>
-            	 
+					<!-- BOTON FOLLOW -->
+				  	
+	              		<button onclick="follow()" type="submit" class="follow-btn-user-profile" id="follow"> FOLLOW </button>
+	            	
+	            	 
             	 <%}else{ %>
             	 
-            	 <!-- BOTON UNFOLLOW -->
-            	 <a href="<%=CONTEXT%>/private/usuario?action=<%=ActionNames.USER_UNFOLLOW%>&<%=ParameterNames.ID%>=<%=idUsuario%>">
-              		<button type="submit" class="unfollow-btn-user-profile"> UNFOLLOW </button>
-            	 </a>
-            	 
-            	 <%} %>
-            <%}%>  
+	            	 <!-- BOTON UNFOLLOW -->
+	            	
+	              		<button onclick="unFollow()" type="submit" class="unfollow-btn-user-profile" id="unFollow"> UNFOLLOW </button>
+	            	
+            	 <%} 
+			   }%>
+             </div>
           </div>
           
           
@@ -204,15 +230,36 @@
 											        		<%=e.getDescripcion() %>
 											        	</span>
 												        <div class="post-profile-iconos">
-												          <i class="icon fas fa-calendar"><%=e.getFechaHora()%></i>
-												          <i class="icon fas fa-mask"><%=e.getTipoTematica()%></i>
-												          <i class="icon fas fa-hotel"><%=e.getTipoEstablecimiento()%></i>
-												          <i class="icon fas fa-hotel"><%=e.getEstablecimiento()%></i>
-												          <i class="icon fas fa-music"><%=e.getTipoMusica()%></i>
-												          <i class="icon fas fa-unlock"><%=e.getPublicoPrivado()%></i>
-												          <i class="icon fas fa-road"><%=e.getCalle() %></i>
-												          <i class="icon fas fa-users"><%=e.getNumAsistentes()%></i>
-												          <i class="icon fas fa-location-arrow"><%=e.getDistanciaKm()%></i>
+												          <i style="font-size: 20px;" class="icon fas fa-calendar"><%=e.getFechaHora()%></i>
+												          
+												          <%if(e.getTipoTematica()!=null) {%>
+												          	<i style="font-size: 20px;" class="icon fas fa-mask"><%=e.getTipoTematica()%></i>
+												          <%} %>
+												          
+												          <i style="font-size: 20px;" class="icon fas fa-hotel"><%=e.getTipoEstablecimiento()%></i>
+												          
+												          <%if(e.getEstablecimiento()!=null) {%>
+												          <i style="font-size: 20px;" class="icon fas fa-hotel"><%=e.getEstablecimiento()%></i>
+												          <%} %>
+												          
+												          <%if(e.getTipoMusica()!=null) {%>
+												          <i style="font-size: 20px;" class="icon fas fa-music"><%=e.getTipoMusica()%></i>
+												          <%} %>
+												          
+												          <%if(e.getPublicoPrivado()==true) {%>
+												          	<i style="font-size: 20px;" class="icon fas fa-lock"></i>
+												          <%}else if(e.getPublicoPrivado()==false){ %>
+												          	<i style="font-size: 20px;" class="icon fas fa-unlock"></i>
+												          <%} %>
+												          
+												          <i style="font-size: 20px;" class="icon fas fa-road"><%=e.getCalle()%></i>
+												          
+												          <%if(e.getNumAsistentes()!=null||e.getNumAsistentes()!=0){ %>
+												          <i style="font-size: 20px;" class="icon fas fa-users"><%=e.getNumAsistentes()%></i>
+												          <%} %>
+												          
+												          <i style="font-size: 20px;" class="icon fas fa-location-arrow"><%=Math.round(e.getDistanciaKm())%>KM</i>
+												          
 												        </div>
 											         </div>  	
 											       </div>
@@ -225,13 +272,67 @@
 			              </div>
 			
 			
-			               <!--  Historial -->
+			                <!--  Historial -->
 			              <input type="radio" name="tabs" id="tabtwo">
 			              <label for="tabtwo">Historial</label>
-			              <div class="tab">
-			              
-			
+			                         <div class="tab">
+								    
+								    <main>
+                 					  <div class="profile-container">
+								    
+								 		  <% for (EventoDTO e : eventosHistorial) { %>
+								 		  	 <a href="<%=CONTEXT%>/private/evento?action=<%=ActionNames.EVENT_DETAIL%>&<%=ParameterNames.ID%>=<%=e.getId()%>">
+										        <div class="post-profile">
+											      	<div class="post-profile-foto">
+											        	<img src="<%=CONTEXT%>/css/images/profile.jpg">
+											      	</div>
+											      	<div class="post-profile-info">
+											        	<h3><%=e.getNombre()%></h3>
+											        	<span style="font-size: 16px;">
+											        		<%=e.getDescripcion() %>
+											        	</span>
+												        <div class="post-profile-iconos">
+												          <i style="font-size: 20px;" class="icon fas fa-calendar"><%=e.getFechaHora()%></i>
+												          
+												          <%if(e.getIdTipoTematica()!=null) {%>
+												          	<i style="font-size: 20px;" class="icon fas fa-mask"><%=e.getTipoTematica()%></i>
+												          <%} %>
+												          
+												          <i style="font-size: 20px;" class="icon fas fa-hotel"><%=e.getTipoEstablecimiento()%></i>
+												          
+												          <%if(e.getIdEstablecimiento()!=null) {%>
+												          <i style="font-size: 20px;" class="icon fas fa-hotel"><%=e.getEstablecimiento()%></i>
+												          <%} %>
+												          
+												          <%if(e.getIdTipoMusica()!=null) {%>
+												          <i style="font-size: 20px;" class="icon fas fa-music"><%=e.getTipoMusica()%></i>
+												          <%} %>
+												          
+												          <%if(e.getPublicoPrivado()==true) {%>
+												          	<i style="font-size: 20px;" class="icon fas fa-lock"></i>
+												          <%}else if(e.getPublicoPrivado()==false){ %>
+												          	<i style="font-size: 20px;" class="icon fas fa-unlock"></i>
+												          <%} %>
+												          
+												          <i style="font-size: 20px;" class="icon fas fa-road"><%=e.getCalle()%></i>
+												          
+												          <%if(e.getNumAsistentes()!=null||e.getNumAsistentes()!=0){ %>
+												          <i style="font-size: 20px;" class="icon fas fa-users"><%=e.getNumAsistentes()%></i>
+												          <%} %>
+												          
+												          <i style="font-size: 20px;" class="icon fas fa-location-arrow"><%=Math.round(e.getDistanciaKm())%>KM</i>
+												          
+												        </div>
+											         </div>  	
+											       </div>
+											  </a>
+									       <%} %>
+									       
+									    </div>
+                					</main>
+				
 			              </div>
+			            
 			            
 			            
 			               <!--  Valoraciones -->
@@ -285,6 +386,8 @@
     
         
 
+
+<script >$(document).ready(initOcultarFollow());</script>
 <script >$(document).ready(initMostrarFollowers());</script>
 <script >$(document).ready(initMostrarFollowing());</script>
 <script >$(document).ready(buscarFollowersAjax());</script>

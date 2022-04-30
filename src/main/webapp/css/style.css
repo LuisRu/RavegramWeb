@@ -8,7 +8,9 @@ import url("https://fonts.googleapis.com/css2?family=Red+Hat+Mono:wght@500&famil
   font-size: 14px;
 
 }
-
+a{
+	text-decoration: none;
+}
 body {
   width: 100%;
   background: #fafafa;
@@ -228,15 +230,30 @@ body {
   background-color: white;
   margin-top: 36px;
   border: 1px solid #dfdfdf;
-  width: 400px;
+  width: 653px;
   min-height: 100px;
   max-height: 180px;
   overflow-y:scroll;
   position: absolute;
-  right: calc(36% - 178px);
+  right: calc(43% - 178px);
   top:42px;
   display: none;
 }
+
+.invitaciones-pendientes{
+  background-color: white;
+  margin-top: 36px;
+  border: 1px solid #dfdfdf;
+  width: 653px;
+  min-height: 100px;
+  max-height: 180px;
+  overflow-y:scroll;
+  position: absolute;
+  right: calc(13% - 178px);
+  top:42px;
+  display: none;
+}
+
 
 
 .inicio-sesion{
@@ -1513,11 +1530,11 @@ body {
   background-color:whitesmoke;
   width: 300px;
   text-align: center;
-  right: 46%;
+  right: 45%;
   overflow-y:scroll;
   height: 200px;
   display:none;
-  top: 3%;
+  top: 2%;
 }
 
 .btn-aceptar{
@@ -1635,8 +1652,8 @@ body {
 
 
 .card{
-  width: 400px;
-  height: 500px;
+  width: 550px;
+  height: 550px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1717,3 +1734,36 @@ body {
 	justify-content: center;
 	margin-bottom: -30px;
 }
+
+.boton-invitar{
+  position: absolute;
+  bottom: 29px;
+  right: 162px;
+  width: 70px;
+  height: 70px;
+  font-size: 18px;
+  border-radius: 50%;
+}
+
+.boton-next{
+  position: absolute;
+  bottom: 29px;
+  right: 308px;
+  width: 70px;
+  height: 70px;
+  font-size: 18px;
+  border-radius: 50%;
+}
+
+.paginacion{
+  list-style: none;
+  list-style-type: none;
+}
+
+.paginacion li{
+  float: left;
+  text-align: center;
+  width: 5em;
+}
+
+

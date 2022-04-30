@@ -3,9 +3,10 @@ package com.luis.ravegram.web.controller.util;
 public class ActionNames {
 
 	public static final String USER_SEARCH = "user-search";
+	public static final String USER_VALIDAR_EMAIL = "user-validar-email";
 	public static final String USER_DELETE = "user-delete";
 	public static final String USER_FOLLOWER_NOT_ACCEPT = "user-follower-not-accept";
-	public static final String USER_SEARCH_ASSISTANTS= "user-searcher-not-accept";
+	public static final String USER_SEARCH_ASSISTANTS= "user-searcher-assistants";
 	public static final String USER_SEARCH_FOLLOWING = "user-search-following";
 	public static final String USER_SEARCH_FOLLOWER = "user-search-follower";
 	public static final String USER_DETAIL = "user-detail";
@@ -13,6 +14,7 @@ public class ActionNames {
 	public static final String USER_MY_PROFILE = "user-my-profile";
 	public static final String USER_CREATE = "user-create";
 	public static final String USER_UPDATE = "user-update";
+	public static final String USER_UPDATE_UBICACION = "user-update-ubicacion";
 	public static final String USER_FOLLOW = "user-follow";
 	public static final String USER_UNFOLLOW = "user-unfollow";
 	public static final String USER_LOGIN = "user-login";
@@ -23,7 +25,9 @@ public class ActionNames {
 	public static final String EVENT_CREATE = "event-create";
 	public static final String EVENT_UPDATE = "event-update";
 	public static final String EVENT_DELETE = "event-delete";
+	public static final String EVENT_FINALIZAR = "event-finalizar";
 	public static final String EVENT_DISPO = "event-dispo";
+	public static final String EVENT_SHARE = "event-share";
 	
 	public static final String PUNTUACION_CREATE = "puntuacion-create";
 	
@@ -32,8 +36,9 @@ public class ActionNames {
 	public static final String INVITIACION_USUARIO = "invitiacion-usuario";
 	public static final String RECHAZA = "rechaza";
 	public static final String SOLICITUDES_PENDIENTES = "solicitud-pediente";
+	public static final String INVITACIONES_PENDIENTES = "invitacion-pediente";
 	public static final String SOLICITUD_ACEPTAR = "solicitud-aceptar";
-	public static final String SOLICITUD_RECHAZAR = "solicitud-aceptar";
+	public static final String SOLICITUD_RECHAZAR = "solicitud-rechazar";
 	
 	public static final String ESTABLECIMIENTO_SEARCH = "establecimiento-search";
 	public static final String ESTABLECIMIENTO_DETAIL = "establecimiento-detail";

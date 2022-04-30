@@ -50,7 +50,7 @@ public class TipoEstablecimientoWebServiceServlet extends HttpServlet {
 				String json = gson.toJson(tiposEstablecimiento);
 
 				response.setContentType("application/json");
-				
+				response.setCharacterEncoding("ISO-8859-1");
 				ServletOutputStream sos = response.getOutputStream();
 				// TODO mimetype
 				sos.write(json.getBytes());

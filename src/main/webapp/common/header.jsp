@@ -31,7 +31,7 @@
             	$('#buscador-results').empty();
             	$('.resultados-busqueda').show();
                 for (i = 0; i<data.length; i++) {
-                	$('#buscador-results').append('<a href="/RavegramWeb/private/usuario?action=user-detail&id='+data[i].id+'"><p><b>'+data[i].userName+'</b></p></a>');
+                	$('#buscador-results').append('<a href="/RavegramWeb/usuario?action=user-detail&id='+data[i].id+'"><p><b>'+data[i].userName+'</b></p></a>');
                 }
               }
             });

@@ -14,10 +14,14 @@ public class AttributeNames {
 	public static final String ASISTENTES = "asistentesr";
 	public static final String EVENT = "event";
 	public static final String EVENTS = "events";
+	public static final String EVENTS_DISPO = "events-dispo";
 	public static final String ESTABLECIMIENTO = "establecimiento";
 	public static final String ESTABLECIMIENTOS = "establecimientos";
 	public static final String PUNTUACIONES = "puntuaciones";
 	public static final String CREATE = "create";
-
+	public static final String TOTAL_PAGES = "total-pages";
+	public static final String CURRENT_PAGE = "current-page";
+	public static final String PAGING_FROM = "paging-from";
+	public static final String PAGING_TO = "paging-to";
 	
 }

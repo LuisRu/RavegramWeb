@@ -2,6 +2,7 @@ package com.luis.ravegram.web.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -19,10 +20,12 @@ import com.luis.ravegram.model.UsuarioDTO;
 import com.luis.ravegram.model.state.SolicitudEstado;
 import com.luis.ravegram.service.SolicitudService;
 import com.luis.ravegram.service.impl.SolicitudServiceImpl;
+import com.luis.ravegram.web.controller.Errors;
 import com.luis.ravegram.web.controller.util.ActionNames;
 import com.luis.ravegram.web.controller.util.AttributeNames;
 import com.luis.ravegram.web.controller.util.ParameterNames;
 import com.luis.ravegram.web.controller.util.SessionManager;
+import com.luis.ravegram.web.util.ValidationUtils;
 
 
 @WebServlet("/solicitud-service")
@@ -42,11 +45,16 @@ public class SolicitudWebServiceServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
+		Errors errors = new Errors();
+		request.setAttribute(AttributeNames.ERRORS, errors);
 
-		String actionStr = request.getParameter(ParameterNames.ACTION);
+		Map<String, String[]> mapParameter = request.getParameterMap();
+		ValidationUtils.setMapParameter(mapParameter);
 
-		// TODO rest style
-		if (ActionNames.SOLICITUDES_PENDIENTES.equals(actionStr)) {
+		String actionName = request.getParameter(ParameterNames.ACTION);
+	
+		
+		if (ActionNames.SOLICITUDES_PENDIENTES.equals(actionName)) {
 
 			UsuarioDTO usuario = (UsuarioDTO)  SessionManager.get(request, AttributeNames.USER);
 
@@ -56,7 +64,7 @@ public class SolicitudWebServiceServlet extends HttpServlet {
 
 				// si no sale texto/html hay que indicar el tipo de contenido (MIMETYPE)
 				response.setContentType("application/json");
-
+				response.setCharacterEncoding("ISO-8859-1");
 				ServletOutputStream sos = response.getOutputStream();
 				sos.write(json.getBytes());
 
@@ -69,27 +77,23 @@ public class SolicitudWebServiceServlet extends HttpServlet {
 			}								
 
 
-		}else if(ActionNames.SOLICITUD_ACEPTAR.equals(actionStr)) {
+		}else if(ActionNames.SOLICITUD_ACEPTAR.equals(actionName)) {
 
-			String idEventoStr = request.getParameter(ParameterNames.ID);
-
-			Long idEvento = Long.valueOf(idEventoStr);
-
-			UsuarioDTO usuario = (UsuarioDTO)  SessionManager.get(request, AttributeNames.USER);
-
+			Long idUsuario = ValidationUtils.longTransform(errors, request.getParameter(ParameterNames.ID));
+			Long idEvento = ValidationUtils.longTransform(errors, request.getParameter(ParameterNames.ID_DOS));
 
 			try {
-				solicitudService.updateEstado(usuario.getId(), idEvento, SolicitudEstado.ACEPTADO);
+				solicitudService.updateEstado(idUsuario, idEvento, SolicitudEstado.ACEPTADO);
 
 				String json = gson.toJson("OK");
 
-				// si no sale texto/html hay que indicar el tipo de contenido (MIMETYPE)
+				
 				response.setContentType("application/json");
-
+				response.setCharacterEncoding("ISO-8859-1");
 				ServletOutputStream sos = response.getOutputStream();
 				sos.write(json.getBytes());
 
-				// se indica el final del json y que envie sus datos con flush
+				
 				sos.flush();
 
 
@@ -98,23 +102,44 @@ public class SolicitudWebServiceServlet extends HttpServlet {
 			}								
 
 
-		}else if(ActionNames.SOLICITUD_RECHAZAR.equals(actionStr)) {
+		}else if(ActionNames.SOLICITUD_RECHAZAR.equals(actionName)) {
 
-			String idEventoStr = request.getParameter(ParameterNames.ID);
+			Long idUsuario = ValidationUtils.longTransform(errors, request.getParameter(ParameterNames.ID));
+			Long idEvento = ValidationUtils.longTransform(errors, request.getParameter(ParameterNames.ID_DOS));
 
-			Long idEvento = Long.valueOf(idEventoStr);
-
-			UsuarioDTO usuario = (UsuarioDTO)  SessionManager.get(request, AttributeNames.USER);
 
 
 			try {
-				solicitudService.updateEstado(usuario.getId(), idEvento, SolicitudEstado.RECHAZADO);
+				solicitudService.updateEstado(idUsuario, idEvento, SolicitudEstado.RECHAZADO);
 
 				String json = gson.toJson("OK");
 
+				
+				response.setContentType("application/json");
+				response.setCharacterEncoding("ISO-8859-1");
+				ServletOutputStream sos = response.getOutputStream();
+				sos.write(json.getBytes());
+
+				
+				sos.flush();
+
+
+			} catch (Exception e) {
+				logger.error("action: "+ActionNames.SOLICITUD_RECHAZAR+" idEvento :"+idEvento, e);
+			}
+			
+			
+		}else if(ActionNames.INVITACIONES_PENDIENTES.equals(actionName)) {
+
+			UsuarioDTO usuario = (UsuarioDTO)  SessionManager.get(request, AttributeNames.USER);
+
+			try {
+				List<SolicitudDTO> solicitudes = solicitudService.findInvitacionesPendientes(usuario.getId());
+				String json = gson.toJson(solicitudes);
+
 				// si no sale texto/html hay que indicar el tipo de contenido (MIMETYPE)
 				response.setContentType("application/json");
-
+				response.setCharacterEncoding("ISO-8859-1");
 				ServletOutputStream sos = response.getOutputStream();
 				sos.write(json.getBytes());
 
@@ -123,8 +148,10 @@ public class SolicitudWebServiceServlet extends HttpServlet {
 
 
 			} catch (Exception e) {
-				logger.error("action: "+ActionNames.SOLICITUD_RECHAZAR+" idEvento :"+idEvento, e);
-			}
+				logger.error("usuarioId: "+usuario.getId(), e);
+			}								
+
+
 		}
 
 

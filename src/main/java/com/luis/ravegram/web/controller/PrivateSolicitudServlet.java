@@ -2,6 +2,7 @@ package com.luis.ravegram.web.controller;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -27,6 +28,7 @@ import com.luis.ravegram.web.controller.util.ParameterNames;
 import com.luis.ravegram.web.controller.util.SessionManager;
 import com.luis.ravegram.web.controller.util.ViewPaths;
 import com.luis.ravegram.web.util.ParametersUtil;
+import com.luis.ravegram.web.util.ValidationUtils;
 
 /**
  * Controlador (Servlet) para peticiones de solicitud
@@ -62,83 +64,92 @@ public class PrivateSolicitudServlet extends HttpServlet {
 
 
 		if (ActionNames.SOLICITUD_EVENTO.equalsIgnoreCase(actionName)) {
-			//solicitud a evento 
+			//SOLICITUD A EVENTO
 
 			targetView=ViewPaths.HOME;
 
 			UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
-			String idEventoStr = request.getParameter(ParameterNames.ID);							
-			Long eventoId = Long.valueOf(idEventoStr); // unsafe conversion
+			Long idEvento = ValidationUtils.longTransform(errors, request.getParameter(ParameterNames.ID));
 			
-			String distancia = request.getParameter(ParameterNames.DISTANCIA);
-			String esPrivado = request.getParameter(ParameterNames.ES_PRIVADO);
-			String tipoEstablecimiento = request.getParameter(ParameterNames.TIPO_ESTABLECIMIENTO);
-			String tipoTematica =request.getParameter(ParameterNames.TIPO_TEMATICA); 
-			String tipoMusica = request.getParameter(ParameterNames.TIPO_MUSICA);
+			
+					try {
 
-			try {
-
-				solicitudService.usuarioSolicita(usuario.getId(), eventoId);
-				
-				Map<String, String> userDetailParams = new HashMap<String, String>();
-				userDetailParams.put(ParameterNames.ACTION, ActionNames.EVENT_SEARCH);
-				if(request.getParameter(ParameterNames.DISTANCIA)!=null){
-					userDetailParams.put(ParameterNames.DISTANCIA, request.getParameter(ParameterNames.DISTANCIA));
-				}
-				if(request.getParameter(ParameterNames.ES_PRIVADO)!=null){
-				userDetailParams.put(ParameterNames.ES_PRIVADO, request.getParameter(ParameterNames.ES_PRIVADO));
-				}
-				if(request.getParameter(ParameterNames.TIPO_ESTABLECIMIENTO)!=null){
-					userDetailParams.put(ParameterNames.TIPO_ESTABLECIMIENTO, request.getParameter(ParameterNames.TIPO_ESTABLECIMIENTO));	
-				}
-				if(request.getParameter(ParameterNames.TIPO_TEMATICA)!=null){
-					userDetailParams.put(ParameterNames.TIPO_TEMATICA, request.getParameter(ParameterNames.TIPO_TEMATICA));	
-				}
-				if(request.getParameter(ParameterNames.TIPO_MUSICA)!=null){
-					userDetailParams.put(ParameterNames.TIPO_MUSICA, request.getParameter(ParameterNames.TIPO_MUSICA));	
-				}
-				
-
-				targetView = ParametersUtil.getURL(ControllerPaths.PRIVATE_EVENTO, userDetailParams);
-				System.out.println(targetView);
+				solicitudService.usuarioSolicita(usuario.getId(), idEvento);
+			
+				targetView = request.getParameter(ParameterNames.URL);
 				forward = false;
+			
 				
 			}catch (RequestInvalidStateException rise) {
-				logger.error("SolicitudEvento: "+idEventoStr,rise.getMessage(), rise);
+				logger.error("SolicitudEvento: "+idEvento,rise.getMessage(), rise);
 				errors.addCommonError(ErrorsNames.ERROR_REQUEST_INVALID_STATE_EXCEPTION);
 			}catch (RequestNotFoundException rnfe) {
-				logger.error("SolicitudEvento: "+idEventoStr,rnfe.getMessage(), rnfe);
+				logger.error("SolicitudEvento: "+idEvento,rnfe.getMessage(), rnfe);
 				errors.addCommonError(ErrorsNames.ERROR_REQUEST_NOT_FOUND_EXCEPTION);
 			} catch (DataException de) {
-				logger.error("SolicitudEvento: "+idEventoStr,de.getMessage(), de);
+				logger.error("SolicitudEvento: "+idEvento,de.getMessage(), de);
 				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
 			}	
 			
 		}else if(ActionNames.RECHAZA.equalsIgnoreCase(actionName)) {
-			//rechaza 
+			//RECHAZA
 			
 			targetView=ViewPaths.HOME;
 
 			UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
-			String idEventoStr = request.getParameter(ParameterNames.ID);							
-			Long idEvento = Long.valueOf(idEventoStr); // unsafe conversion
+			Long idEvento = ValidationUtils.longTransform(errors, request.getParameter(ParameterNames.ID));							
 
 			try {
 
 				solicitudService.eventoNoInteresa(usuario.getId(), idEvento);
+				
+				targetView = request.getParameter(ParameterNames.URL);
+				forward = false;
+			
 
 			}catch (RequestInvalidStateException rise) {
-				logger.error("SolicitudRechaza: "+idEventoStr,rise.getMessage(), rise);
+				logger.error("SolicitudRechaza: "+idEvento,rise.getMessage(), rise);
 				errors.addCommonError(ErrorsNames.ERROR_REQUEST_INVALID_STATE_EXCEPTION);
 			}catch (RequestNotFoundException rnfe) {
-				logger.error("SolicitudRechaza: "+idEventoStr,rnfe.getMessage(), rnfe);
+				logger.error("SolicitudRechaza: "+idEvento,rnfe.getMessage(), rnfe);
 				errors.addCommonError(ErrorsNames.ERROR_REQUEST_NOT_FOUND_EXCEPTION);
 			} catch (DataException de) {
-				logger.error("SolicitudRechaza: "+idEventoStr,de.getMessage(), de);
+				logger.error("SolicitudRechaza: "+idEvento,de.getMessage(), de);
 				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
 			}	
 
 
+		}else if(ActionNames.INVITIACION_USUARIO.equalsIgnoreCase(actionName)) {
+			//INVITAR A USUARIOS A MIS EVENTOS
+			
+			targetView=ViewPaths.HOME;
+			String idUsuarioStr = request.getParameter(ParameterNames.ID); 
+			Long idUsuario = ValidationUtils.longTransform(errors, idUsuarioStr);
+			List<Long> idsEventos = (ValidationUtils.longValidator(errors, request, ParameterNames.IDS));
+
+			try {
+				//TODO hacer en service
+				for(Long id: idsEventos) {
+					solicitudService.eventoInvita(idUsuario, id);
+				}
+				
+				targetView = request.getParameter(ParameterNames.URL);
+				forward = false;
+				
+
+			}catch (RequestInvalidStateException rise) {
+				logger.error("SolicitudRechaza: ",rise.getMessage(), rise);
+				errors.addCommonError(ErrorsNames.ERROR_REQUEST_INVALID_STATE_EXCEPTION);
+			}catch (RequestNotFoundException rnfe) {
+				logger.error("SolicitudRechaza: ",rnfe.getMessage(), rnfe);
+				errors.addCommonError(ErrorsNames.ERROR_REQUEST_NOT_FOUND_EXCEPTION);
+			} catch (DataException de) {
+				logger.error("SolicitudRechaza: ",de.getMessage(), de);
+				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
+			}	
+
+		}else {
+			targetView= ViewPaths.HOME;
 		}
 
 

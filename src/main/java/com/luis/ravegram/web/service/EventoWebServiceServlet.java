@@ -63,7 +63,7 @@ public class EventoWebServiceServlet extends HttpServlet {
 
 				// si no sale texto/html hay que indicar el tipo de contenido (MIMETYPE)
 				response.setContentType("application/json");
-
+				response.setCharacterEncoding("ISO-8859-1");
 				ServletOutputStream sos = response.getOutputStream();
 				sos.write(json.getBytes());
 
@@ -75,6 +75,7 @@ public class EventoWebServiceServlet extends HttpServlet {
 				logger.error("TiposEstadoEvento: ", e);
 			}								
 
+			
 
 		}else if(ActionNames.EVENT_DISPO.equals(actionStr)) {
 			
@@ -90,7 +91,7 @@ public class EventoWebServiceServlet extends HttpServlet {
 
 				// si no sale texto/html hay que indicar el tipo de contenido (MIMETYPE)
 				response.setContentType("application/json");
-
+				response.setCharacterEncoding("ISO-8859-1");
 				ServletOutputStream sos = response.getOutputStream();
 				sos.write(json.getBytes());
 

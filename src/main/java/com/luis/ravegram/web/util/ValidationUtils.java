@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import javax.security.auth.message.callback.PrivateKeyCallback.Request;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
@@ -37,12 +36,12 @@ public class ValidationUtils {
 
 
 	//TODO poner numeros letras etc
-	private static final Pattern USER_NAME_REGEX = Pattern.compile("[A-Za-z]*");
-	private static final Pattern EVENT_NAME_REGEX = Pattern.compile("/^[a-zA-Z\\s]*$/");
+	private static final Pattern USER_NAME_REGEX = Pattern.compile("^[a-zA-Z0-9 ,.'-]+$");
+	private static final Pattern EVENT_NAME_REGEX = Pattern.compile("^[a-zA-Z\\s]*$");
 	private static final Pattern CONTRASENA_REGEX = Pattern.compile("[[a-z]+[A-Z]+[0-9]]{6,20}");
 	private static final Pattern TELEFONO_REGEX = Pattern.compile("^[6,8,9][0-9]{8}$|^\\\\+[0-9]{2}\\\\s[1-9][0-9]{8}$");
 
-	private static final String DATE_FORMAT = "dd-MM-yyyy";
+	private static final String DATE_FORMAT = "yyyy-MM-dd";
 	private static final String DATE_FORMAT_CON_HORA = "dd-MM-yyyy H:m:s";
 
 
@@ -75,6 +74,23 @@ public class ValidationUtils {
 		}
 
 		return userName;
+
+	}
+	
+	
+	public static String orderByTransform(Errors errors,String parameter) { 
+
+		String orderBy = parameter;
+		String order = null;
+
+		if(!StringUtils.isBlank(orderBy)) {
+			orderBy = orderBy.trim();
+			if("NOMBRE-ASC".equals(orderBy)||"NOMBRE-DESC".equals(orderBy)||"FECHA-ASC".equals(orderBy)||"FECHA-DESC".equals(orderBy)) {
+				order = orderBy;
+			}
+		}
+
+		return order;
 
 	}
 
@@ -167,6 +183,80 @@ public class ValidationUtils {
 
 	}
 
+	
+	public static Date fechaMayorEdad(Errors errors,String parameterName) { 
+
+
+		String fecha = getParameterMap(parameterName);
+		Date date = null;
+
+
+		if(!StringUtils.isBlank(fecha)) {
+			fecha = fecha.trim();
+			try {
+
+				
+				
+				
+				//Sacar el año actual
+				Calendar fechaActual = Calendar.getInstance();
+				int anoActual = fechaActual.get(Calendar.YEAR);
+				
+				
+				
+				
+				//Pasamos la fecha que puso a calendar
+				Calendar fechaIntroducida = Calendar.getInstance();
+				SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+				fechaIntroducida.setTime(sdf.parse(fecha));
+				
+				
+				int anoNacimiento = fechaIntroducida.get(Calendar.YEAR);
+				
+				if((anoActual-anoNacimiento)<18) {
+					errors.addParameterError(parameterName,ErrorsParameter.ERROR_MENOR_EDAD);	
+				}else {
+					date = new SimpleDateFormat(DATE_FORMAT).parse(fecha);
+				}
+
+			}catch(ParseException e) {
+				errors.addParameterError(parameterName,ErrorsParameter.ERROR_FORMATO_INVALIDO);
+				logger.error("error comviritiendo la fecha : "+fecha);
+			}
+
+		}else {
+			errors.addParameterError(parameterName, ErrorsParameter.ERROR_VACIO);
+		}
+
+		return date;
+
+	}
+	
+	
+	public static Date fechaEdad(Errors errors,String parameterName) {
+		String edadStr = getParameterMap(parameterName);
+		Integer edad = null;
+		
+		Calendar fecha = Calendar.getInstance();
+		Date fechaNacimiento = null;
+		
+		if(!StringUtils.isBlank(edadStr)) {
+			edadStr = edadStr.trim();
+		try {
+			edad = Integer.valueOf(edadStr);
+			fecha.add(Calendar.YEAR, -edad);
+			fechaNacimiento = fecha.getTime();
+		}catch (NumberFormatException nfe) {
+			errors.addParameterError(parameterName, ErrorsParameter.ERROR_FORMATO_INVALIDO);
+			logger.error("error comviritiendo a integer el numero  : "+edadStr);
+		}
+		}
+	
+		return fechaNacimiento;
+
+	}
+	
+	
 
 	public static Date fechaHora(Errors errors,String parameterName) { 
 
@@ -182,7 +272,7 @@ public class ValidationUtils {
 			try {
 				//TODO poner hora
 				date = new SimpleDateFormat(DATE_FORMAT).parse(fecha);
-				if(date.compareTo(today)>0) {
+				if(date.compareTo(today)<0) {
 					errors.addParameterError(parameterName, ErrorsParameter.FECHA_ERROR_PASADA);
 				}
 
@@ -198,17 +288,24 @@ public class ValidationUtils {
 		return date;
 
 	}
+	
+	
+	
 
 
-	public static char sexo(Errors errors,String parameterName) { 
+	public static Character sexo(Errors errors,String parameterName) { 
 
 		String sexo = getParameterMap(parameterName);
-		char sexoChar = Character.MIN_VALUE;
+		Character sexoChar = null;
+		char hombre = 'H';
+		char mujer = 'M';
 
+		
 		if(!StringUtils.isBlank(sexo)) {
 			sexo = sexo.trim();
-			if(sexo.equalsIgnoreCase("H") || sexo.equalsIgnoreCase("M"))  {
-				sexoChar = sexo.charAt(0);
+			sexoChar = Character.valueOf(sexo.charAt(0));
+			if(Character.compare(sexoChar,hombre)==0 ||Character.compare(sexoChar,mujer)==0)  {
+				return sexoChar;
 			}else {
 				errors.addParameterError(parameterName, ErrorsParameter.ERROR_FORMATO_INVALIDO);
 			}
@@ -243,7 +340,7 @@ public class ValidationUtils {
 		if(!StringUtils.isBlank(biografia)) {
 			biografia = biografia.trim();
 			if(biografia.length()>500) {
-				errors.addParameterError(parameterName, ErrorsParameter.CONTRASENA_ERROR_FORMATO_INVALIDO);
+				errors.addParameterError(parameterName, ErrorsParameter.ERROR_FORMATO_INVALIDO);
 			}
 		}
 
@@ -313,6 +410,26 @@ public class ValidationUtils {
 
 		return number;
 	}
+	
+	
+	public static Double doubleValidator(Errors errors,String parameterName) {
+		Double number = null;
+		String numberStr = getParameterMap(parameterName);
+
+		if(!StringUtils.isBlank(numberStr)) {
+			try {
+				number = Double.valueOf(numberStr);
+			}catch (NumberFormatException nfe) {
+				errors.addParameterError(parameterName, ErrorsParameter.ERROR_FORMATO_INVALIDO);
+				logger.error("error comviritiendo a Double : "+numberStr);
+			}
+		}else {
+				errors.addParameterError(parameterName, ErrorsParameter.ERROR_VACIO);
+
+		}
+
+		return number;
+	}
 
 
 	public static List<Long> longValidator(Errors errors,HttpServletRequest request,String parameterName ) {
@@ -360,9 +477,35 @@ public class ValidationUtils {
 
 		return boolea;
 	}
+	
+
+	 
 
 
+		
+	
+	
 
+
+	public static Integer intTransform(Errors errors,String parameter) {
+
+		Integer number = null;
+
+		if(!StringUtils.isBlank(parameter)) {
+			try {
+				number = Integer.valueOf(parameter);
+
+			}catch (NumberFormatException nfe) {
+				logger.error("error comviritiendo a integer el numero  : "+parameter);
+			}
+		}else {
+			if (logger.isInfoEnabled()) {
+				logger.info("intTransform vacio = "+parameter);
+			}			
+		}
+
+		return number;
+	}
 
 
 
@@ -379,7 +522,7 @@ public class ValidationUtils {
 			}
 		}else {
 			if (logger.isInfoEnabled()) {
-				logger.info("longTransform vario = "+parameter);
+				logger.info("longTransform vacio = "+parameter);
 			}			
 		}
 
@@ -392,15 +535,12 @@ public class ValidationUtils {
 		Boolean boolen = null;
 
 		if(!StringUtils.isBlank(parameter)) {
-			try {
+			if("true".equalsIgnoreCase(parameter)||"false".equalsIgnoreCase(parameter)) {
 				boolen = Boolean.valueOf(parameter);
-
-			}catch (NumberFormatException nfe) {
-				logger.error("error comviritiendo a Long el numero  : "+parameter);
 			}
 		}else {
 			if (logger.isInfoEnabled()) {
-				logger.info("longTransform vario = "+parameter);
+				logger.info("longTransform varcio = "+parameter);
 			}			
 		}
 

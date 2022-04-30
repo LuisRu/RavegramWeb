@@ -2,7 +2,6 @@ package com.luis.ravegram.web.controller;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,6 +42,7 @@ import com.luis.ravegram.web.controller.util.SessionManager;
 import com.luis.ravegram.web.controller.util.ViewPaths;
 import com.luis.ravegram.web.util.ParametersUtil;
 import com.luis.ravegram.web.util.ValidationUtils;
+import com.luis.ravegram.web.util.WebPaginUtils;
 
 /**
  * Controlador (Servlet) para peticiones de usuario autenticadas.
@@ -68,9 +68,6 @@ public class PrivateUsuarioServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		// CommandManager.getInstance().doAction(request, response);Errors errors = new
-		// Errors();
-
 		String targetView = null;
 		boolean forward = true;
 
@@ -86,21 +83,35 @@ public class PrivateUsuarioServlet extends HttpServlet {
 			logger.info("Processing action " + actionName);
 		}
 
+		
+		
 		if (ActionNames.USER_SEARCH.equalsIgnoreCase(actionName)) {
 			// BUSQUEDA CRITERIA
 
-			String distanciaStr = request.getParameter(ParameterNames.DISTANCIA);
-			String edadMaxStr = request.getParameter(ParameterNames.EDAD_MAX);
-			String edadMinStr = request.getParameter(ParameterNames.EDAD_MIN);
-
+			UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
+			targetView=ViewPaths.HOME;
+			
 			UsuarioCriteria uc = new UsuarioCriteria();
-			uc.setDistanciaKm(null);
-			uc.setEdadHasta(null);// maxima
-			uc.setEdadDesde(null);
+			uc.setEdadHasta(ValidationUtils.fechaEdad(errors, ParameterNames.EDAD_MAX));// maxima
+			uc.setEdadDesde(ValidationUtils.fechaEdad(errors, ParameterNames.EDAD_MIN));
+			uc.setIdBuscador(usuario.getId());
 
 			try {
-				Results<UsuarioDTO> usuarios = usuarioService.findByCriteria(uc, 1, 10);
-				request.setAttribute(AttributeNames.USERS, usuarios.getData());
+				Integer currentPage = WebPaginUtils.getCurrentPage(request);
+
+				Results<UsuarioDTO> results = usuarioService.findByCriteria(uc, (currentPage-1)*1+1, 1);
+				request.setAttribute(AttributeNames.USERS, results.getData());
+				
+
+
+				// Atributos para paginacion
+				Integer totalPages = WebPaginUtils.getTotalPages(results.getTotal(), 1);
+				request.setAttribute(AttributeNames.TOTAL_PAGES, totalPages);
+				request.setAttribute(AttributeNames.CURRENT_PAGE, currentPage);
+				//el 1 es el numero de paginas q 
+				request.setAttribute(AttributeNames.PAGING_FROM, WebPaginUtils.getPageFrom(currentPage, 1, totalPages));
+				request.setAttribute(AttributeNames.PAGING_TO, WebPaginUtils.getPageTo(currentPage, 1, totalPages));
+
 
 				targetView = ViewPaths.USER_RESULT;
 
@@ -111,9 +122,9 @@ public class PrivateUsuarioServlet extends HttpServlet {
 			}
 
 		} else if (ActionNames.USER_DELETE.equalsIgnoreCase(actionName)) {
-			// delete user
+			// DELETE USER
 
-			targetView = ViewPaths.USER_LOGIN;
+			targetView = ViewPaths.HOME;
 
 			UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
 
@@ -123,6 +134,7 @@ public class PrivateUsuarioServlet extends HttpServlet {
 
 				CookieManager.setValue(response, AttributeNames.USER, Strings.EMPTY, -1);
 				SessionManager.set(request, AttributeNames.USER, null);
+				
 
 			} catch (UserNotFoundException unfe) {
 				logger.error("UserDelete: ", unfe.getMessage(), unfe);
@@ -132,8 +144,10 @@ public class PrivateUsuarioServlet extends HttpServlet {
 				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
 			}
 
+			
+			
 		} else if (ActionNames.USER_MY_PROFILE.equalsIgnoreCase(actionName)) {
-			// my perfil
+			// MY PROFILE
 			UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
 
 			try {
@@ -143,13 +157,20 @@ public class PrivateUsuarioServlet extends HttpServlet {
 				ec.setTipoEstadoEvento(EventoEstado.APTO);
 				ec.setLatitudBuscador(usuario.getLatitud());
 				ec.setLongitudBuscador(usuario.getLongitud());
+				
+				//eventos dispo
 				Results<EventoDTO> resultsEventosDisponibles = eventoService.findByCriteria(ec, 1, 10);
+				
+				//eventos finalizados
+				ec.setTipoEstadoEvento(EventoEstado.FINALIZADO);
+				Results<EventoDTO> resultsHistorialResultados = eventoService.findByCriteria(ec, 1, 10);
+				
 
 				// buscamos todas las puntuaciones que recibio los eventos un usuario
-				Results<UsuarioEventoPuntuaDTO> resultsPuntuaciones = puntuacionService
-						.findByEventosUsuario(usuario.getId(), 1, 10);
+				Results<UsuarioEventoPuntuaDTO> resultsPuntuaciones = puntuacionService.findByEventosUsuario(usuario.getId(), 1, 10);
 
 				request.setAttribute(AttributeNames.EVENTS, resultsEventosDisponibles.getData());
+				request.setAttribute(AttributeNames.EVENTS_DISPO, resultsHistorialResultados.getData());
 				request.setAttribute(AttributeNames.PUNTUACIONES, resultsPuntuaciones.getData());
 
 				targetView = ViewPaths.USER_MY_PROFILE;
@@ -158,101 +179,50 @@ public class PrivateUsuarioServlet extends HttpServlet {
 				logger.error("UserMyProfile: ", de.getMessage(), de);
 				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
 			}
-
-		} else if (ActionNames.USER_FOLLOW.equalsIgnoreCase(actionName)) {
-			// follow
-
-			targetView = ViewPaths.HOME;
-
-			String idSeguidoStr = request.getParameter(ParameterNames.ID);
-			UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
-
-			try {
-
-				usuarioSigueService.follow(usuario.getId(), Long.valueOf(idSeguidoStr));
-
-				Set<Long> idsSeguidos = usuarioService.findSeguidosIds(usuario.getId());
-				SessionManager.set(request, AttributeNames.FOLLOWING, idsSeguidos);
-
-				Map<String, String> userDetailParams = new HashMap<String, String>();
-				userDetailParams.put(ParameterNames.ACTION, ActionNames.USER_DETAIL);
-				userDetailParams.put(ParameterNames.ID, idSeguidoStr);
-
-				targetView = ParametersUtil.getURL(ControllerPaths.USER, userDetailParams);
-				forward = false;
-
-			} catch (DataException de) {
-				logger.error("Follow: " + idSeguidoStr, de.getMessage(), de);
-				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
-			}
-
-		} else if (ActionNames.USER_UNFOLLOW.equalsIgnoreCase(actionName)) {
-			// unfollow
-
-			targetView = ViewPaths.HOME;
-
-			String idSeguidoStr = ParametersUtil.getValue(request, ParameterNames.ID);
-			UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
-
-			try {
-
-				usuarioSigueService.unFollow(usuario.getId(), Long.valueOf(idSeguidoStr));
-
-				Set<Long> idsSeguidos = usuarioService.findSeguidosIds(usuario.getId());
-				SessionManager.set(request, AttributeNames.FOLLOWING, idsSeguidos);
-
-				Map<String, String> userDetailParams = new HashMap<String, String>();
-				userDetailParams.put(ParameterNames.ACTION, ActionNames.USER_DETAIL);
-				userDetailParams.put(ParameterNames.ID, idSeguidoStr);
-
-				targetView = ParametersUtil.getURL(ControllerPaths.USER, userDetailParams);
-				forward = false;
-
-			} catch (DataException de) {
-				logger.error("UnFollow: " + idSeguidoStr, de.getMessage(), de);
-				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
-			}
-
+			
+		
 		} else if (ActionNames.USER_LOGOUT.equalsIgnoreCase(actionName)) {
 			// LOGOUT
+			targetView = ViewPaths.HOME;
 
-			if (logger.isInfoEnabled()) {
-				UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
-				logger.info("Logging out " + usuario.getEmail());
-			}
-
-			targetView = ViewPaths.USER_LOGIN;
-			forward = false;
-
+			//sacamos de la sesion y quitamos cookie
 			CookieManager.setValue(response, AttributeNames.USER, Strings.EMPTY, -1);
 			SessionManager.set(request, AttributeNames.USER, null);
+			
+			targetView=ViewPaths.USER_LOGIN;
 
 		} else if (ActionNames.USER_UPDATE.equalsIgnoreCase(actionName)) {
 			// UPDATE
 
+			targetView = ViewPaths.USER_UPDATE;
+			
 			UsuarioDTO usuario = (UsuarioDTO) SessionManager.get(request, AttributeNames.USER);
 
-			targetView = ViewPaths.USER_UPDATE;
-
+			//seteo los datos 
 			UsuarioDTO usuarioCrear = usuario;
 			usuarioCrear.setUserName(ValidationUtils.userName(errors, ParameterNames.USER_NAME));
 			usuarioCrear.setContrasena(usuario.getContrasena());
-			System.out.println(usuarioCrear.getContrasena());
 			usuarioCrear.setFechaNacimiento(ValidationUtils.fecha(errors, ParameterNames.FECHA_NACIMIENTO));
 			usuarioCrear.setSexo(ValidationUtils.sexo(errors, ParameterNames.SEXO));
 			usuarioCrear.setBiografia(ValidationUtils.biografia(errors, ParameterNames.BIOGRAFIA));
-			// TODO
-			usuarioCrear.setTelefono("698166923");
-			usuarioCrear.setLatitud(22.00000D);
-			usuarioCrear.setLongitud(22.00000D);
-			// usuarioCrear.setEmail(usuario.getEmail());
-			// usuarioCrear.setTipoEstadoCuenta(usuario.getTipoEstadoCuenta());
+			usuarioCrear.setTelefono(ValidationUtils.telefono(errors, ParameterNames.TELEFONO));
+			
+			
 
 			if (!errors.hasErrors()) {
 				try {
 					usuarioService.update(usuarioCrear, usuario);
+					
 					SessionManager.set(request, AttributeNames.USER, usuarioCrear);
-					targetView = ViewPaths.HOME;
+					
+
+					//redirecciono a la misma vista
+					Map<String, String> userDetailParams = new HashMap<String, String>();
+					userDetailParams.put(ParameterNames.ACTION, ActionNames.USER_MY_PROFILE);
+
+					targetView = ParametersUtil.getURL(ControllerPaths.PRIVATE_USER, userDetailParams);
+					forward = false;
+					
 				} catch (UserNotFoundException unfe) {
 					logger.error("UserUpdate: ", unfe.getMessage(), unfe);
 					errors.addCommonError(ErrorsNames.ERROR_USER_NOT_FOUND_EXCEPTION);
@@ -261,8 +231,12 @@ public class PrivateUsuarioServlet extends HttpServlet {
 					errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
 				}
 			}
+		}else {
+			targetView = ViewPaths.HOME;
 		}
 
+		
+		
 		logger.info("Redirigiendo a " + targetView);
 		if (forward) {
 			request.getRequestDispatcher(targetView).forward(request, response);

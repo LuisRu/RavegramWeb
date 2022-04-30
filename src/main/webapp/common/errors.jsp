@@ -10,7 +10,7 @@
  	List<String> commonErrors = errors.getCommonErrors();
  	if (commonErrors.size()>0) {
  %>
- 	 <div class="error-common">
+ 	 <div class="error-common" id="errors-common">
  		<% for (String error: commonErrors) { %>
  				<span><%=error %></span>
  		<%} %>

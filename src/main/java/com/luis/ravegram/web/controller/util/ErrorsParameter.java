@@ -10,6 +10,7 @@ public class ErrorsParameter {
 	public static final String BIOGRAFIA_ERROR_FORMATO_INVALIDO = "El formato introducido no es valido, hay un maximo de 500 caracteres";
 	public static final String FECHA_ERROR_PASADA = "La fecha introducida ya paso";
 	public static final String ERROR_FUERA_RANGO = "El dato introducido no existe";
+	public static final String ERROR_MENOR_EDAD = "No puedes registrarte si eres menor";
 	
 	
 	

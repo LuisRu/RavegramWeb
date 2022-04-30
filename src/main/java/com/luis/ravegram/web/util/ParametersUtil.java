@@ -4,6 +4,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
@@ -39,6 +40,21 @@ public class ParametersUtil {
 		}
 	}
 	
+	public static final String getURLPaginacion(String uri, Map<String, String[]> parameters) {
+		StringBuilder sb = new StringBuilder(uri);
+		if (parameters.size()>0) {
+			sb.append("?");
+		}
+		String[] pvalues = null;
+		for (String pname: parameters.keySet()) {
+			pvalues = parameters.get(pname);
+			for (String pvalue: pvalues) {
+				sb.append(URLEncoder.encode(pname)).append("=").append(URLEncoder.encode(pvalue)).append("&");
+			}
+		}
+		return sb.toString();
+	}
+	
 	
 	public static final String printNull(String parameterValue) {
 		if (StringUtils.isEmpty(parameterValue)) {
@@ -46,6 +62,20 @@ public class ParametersUtil {
 		} else {
 			return parameterValue.trim();
 		}
+	}
+	
+	
+	public static final int printEdad(Date fechaNacimiento) {
+		
+		Calendar fechaNacimientoCalendar = Calendar.getInstance();
+		fechaNacimientoCalendar.setTime(fechaNacimiento);
+		
+		Calendar fechaActual = Calendar.getInstance();
+		
+		int anoActual = fechaActual.get(Calendar.YEAR);
+		int anoNacimiento = fechaNacimientoCalendar.get(Calendar.YEAR);
+		
+		return anoActual - anoNacimiento;
 	}
 	
 	public static final String print(Long parameterValue) {

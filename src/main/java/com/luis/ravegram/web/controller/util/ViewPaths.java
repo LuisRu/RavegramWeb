@@ -26,8 +26,8 @@ public class ViewPaths {
 	public static final String EVENT_CREATE = PRIVATE_AREA + "/event/event-create.jsp";
 	public static final String EVENT_UPDATE = PRIVATE_AREA + "/event/event-update.jsp";
 	
-	public static final String ESTABLECIMIENTO_RESULT = "/establecimiento/establecimiento-result.jsp";
-	public static final String ESTABLECIMIENTO_DETAIL = "/establecimiento/establecimiento-detail.jsp";
+	public static final String ESTABLECIMIENTO_RESULT = PRIVATE_AREA + "/establecimiento/establecimiento-result.jsp";
+	public static final String ESTABLECIMIENTO_DETAIL = PRIVATE_AREA + "/establecimiento/establecimiento-detail.jsp";
 	
 
 	

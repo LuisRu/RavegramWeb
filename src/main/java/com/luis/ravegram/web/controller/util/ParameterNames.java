@@ -33,6 +33,8 @@ public class ParameterNames {
 	public static final String LOCALIDAD ="localidad";
 	public static final String ESTABLECIMIENTO ="establecimiento";
 	public static final String IDS_ASISTENTES ="ids-asistentes";
+	public static final String ORDER_BY ="order-by";
+	
 	
 	
 	
@@ -41,11 +43,14 @@ public class ParameterNames {
 	public static final String VALORACION ="valoracion";
 	
 	
+	public static final String PAGE ="page";
 	public static final String BUSCADOR ="buscador";
 	public static final String UPDATE ="update";
 	public static final String CREATE ="create";
 	public static final String ID = "id";
 	public static final String ID_DOS = "id-dos";
 	public static final String TRUE ="true";
+	public static final String URL ="url";
+	public static final String IDS ="ids";
 	
 }
