@@ -213,10 +213,10 @@ public class PrivateEventoServlet extends HttpServlet {
 					targetView = request.getParameter(ParameterNames.URL);
 					forward=false;
 				} catch (MailException me) {
-					logger.error("EventSearch: ", me.getMessage(), me);
+					logger.error("eventShare: ", me.getMessage(), me);
 					errors.addCommonError(ErrorsNames.ERROR_MAIL_EXCEPTION);
 				} catch (DataException de) {
-					logger.error("EventSearch: ", de.getMessage(), de);
+					logger.error("eventShare: ", de.getMessage(), de);
 					errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
 				}
 
@@ -369,7 +369,10 @@ public class PrivateEventoServlet extends HttpServlet {
 
 							targetView = ParametersUtil.getURL(ControllerPaths.PRIVATE_EVENTO, userDetailParams);
 							forward = false;
-
+							
+						} catch (EventoNotFoundException enfe) {
+							logger.error("EventFinalizar: ", enfe.getMessage(), enfe);
+							errors.addCommonError(ErrorsNames.ERROR_EVENTO_NOT_FOUND_EXCEPTION);
 						} catch (DataException de) {
 							logger.error("EventFinalizar: ", de.getMessage(), de);
 							errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);

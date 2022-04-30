@@ -146,9 +146,7 @@ public class PrivateUsuarioServlet extends HttpServlet {
 				SessionManager.set(request, AttributeNames.USER, null);
 				
 
-			} catch (UserNotFoundException unfe) {
-				logger.error("UserDelete: ", unfe.getMessage(), unfe);
-				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
+		
 			} catch (DataException de) {
 				logger.error("UserDelete: ", de.getMessage(), de);
 				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);

@@ -203,7 +203,7 @@ public class UsuarioServlet extends HttpServlet {
 
 				} catch (UserAlreadyExistsException uaee) {
 					logger.error("UserCreate: "+mapParameter.get(ParameterNames.EMAIL)[0],uaee.getMessage(), uaee);
-					errors.addCommonError("El usuario ya existe");
+					errors.addCommonError(ErrorsNames.ERROR_ALREADY_EXISTS_EXCEPTION);
 				} catch (MailException me) {
 					logger.error("UserCreate: "+mapParameter.get(ParameterNames.EMAIL)[0],me.getMessage(), me);
 					errors.addCommonError(ErrorsNames.ERROR_MAIL_EXCEPTION);

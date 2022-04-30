@@ -122,11 +122,16 @@ public class PrivateSolicitudServlet extends HttpServlet {
 		}else if(ActionNames.INVITIACION_USUARIO.equalsIgnoreCase(actionName)) {
 			//INVITAR A USUARIOS A MIS EVENTOS
 			
-			targetView=ViewPaths.HOME;
+			targetView = request.getParameter(ParameterNames.URL);
+			
 			String idUsuarioStr = request.getParameter(ParameterNames.ID); 
 			Long idUsuario = ValidationUtils.longTransform(errors, idUsuarioStr);
 			List<Long> idsEventos = (ValidationUtils.longValidator(errors, request, ParameterNames.IDS));
-
+			if(idsEventos==null) {
+				errors.addCommonError(ErrorsNames.ERROR_DEBES_SELECCION);
+				
+			}
+			if(!errors.hasErrors()){
 			try {
 				//TODO hacer en service
 				for(Long id: idsEventos) {
@@ -138,15 +143,16 @@ public class PrivateSolicitudServlet extends HttpServlet {
 				
 
 			}catch (RequestInvalidStateException rise) {
-				logger.error("SolicitudRechaza: ",rise.getMessage(), rise);
+				logger.error("invitar: ",rise.getMessage(), rise);
 				errors.addCommonError(ErrorsNames.ERROR_REQUEST_INVALID_STATE_EXCEPTION);
 			}catch (RequestNotFoundException rnfe) {
-				logger.error("SolicitudRechaza: ",rnfe.getMessage(), rnfe);
+				logger.error("invitar:: ",rnfe.getMessage(), rnfe);
 				errors.addCommonError(ErrorsNames.ERROR_REQUEST_NOT_FOUND_EXCEPTION);
 			} catch (DataException de) {
-				logger.error("SolicitudRechaza: ",de.getMessage(), de);
+				logger.error("invitar:: ",de.getMessage(), de);
 				errors.addCommonError(ErrorsNames.ERROR_DATA_EXCEPTION);
 			}	
+			}
 
 		}else {
 			targetView= ViewPaths.HOME;

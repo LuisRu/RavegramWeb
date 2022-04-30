@@ -9,6 +9,7 @@ public class ErrorsNames {
 	public static final String ERROR_ALREADY_EXISTS_EXCEPTION = "El usuario que esta tratando de crear ya existe, intentelo con otro correo";
 	public static final String ERROR_INVALID_USER_PASSWORD_EXCEPTION = "El email o la contraseña son incorrectos, porfavor intentelo de nuevo";
 	public static final String ERROR_USER_NOT_FOUND_EXCEPTION = "El usuario que esta tratando de actualizar no existe";
+	public static final String ERROR_DEBES_SELECCION = "Debes seleccionar algunb evento antes de invitar";
 	
 	//eventos
 	public static final String ERROR_EVENTO_NOT_FOUND_EXCEPTION = "El evento que esta tratando de actualizar no existe";
