@@ -210,7 +210,7 @@ public class PrivateUsuarioServlet extends HttpServlet {
 			UsuarioDTO usuarioCrear = usuario;
 			usuarioCrear.setUserName(ValidationUtils.userName(errors, ParameterNames.USER_NAME));
 			usuarioCrear.setContrasena(usuario.getContrasena());
-			usuarioCrear.setFechaNacimiento(ValidationUtils.fecha(errors, ParameterNames.FECHA_NACIMIENTO));
+			usuarioCrear.setFechaNacimiento(ValidationUtils.fechaMayorEdad(errors, ParameterNames.FECHA_NACIMIENTO));
 			usuarioCrear.setSexo(ValidationUtils.sexo(errors, ParameterNames.SEXO));
 			usuarioCrear.setBiografia(ValidationUtils.biografia(errors, ParameterNames.BIOGRAFIA));
 			usuarioCrear.setTelefono(ValidationUtils.telefono(errors, ParameterNames.TELEFONO));

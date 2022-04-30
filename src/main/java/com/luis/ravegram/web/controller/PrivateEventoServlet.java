@@ -245,6 +245,8 @@ public class PrivateEventoServlet extends HttpServlet {
 			// TODO descativarlos de obligatorio
 			evento.setIdLocalidad(1L);
 			evento.setZip("111111");
+			evento.setLatitud(22.00000D);
+			evento.setLongitud(22.00000D);
 			
 			
 			// asistentes
