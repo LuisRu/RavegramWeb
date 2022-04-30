@@ -301,7 +301,7 @@ public class UsuarioWebServiceServlet extends HttpServlet {
 				uc.setBusqueda(buscadorStr);
 
 				//TODO PAGINACION
-				results = usuarioService.findByCriteria(uc,Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_WEB_PROPERTIES, START_INDEX)) , Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_WEB_PROPERTIES,PAGE_SIZE_SEARCH_USUARIO)));
+				results = usuarioService.findByCriteria(uc,1,10);
 
 
 				String json = gson.toJson(results.getData());
