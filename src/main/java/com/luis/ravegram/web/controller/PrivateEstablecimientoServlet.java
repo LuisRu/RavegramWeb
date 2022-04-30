@@ -80,12 +80,11 @@ public class PrivateEstablecimientoServlet extends HttpServlet {
 			targetView=ViewPaths.HOME;
 
 			EstablecimientoCriteria ec = new EstablecimientoCriteria();
-			ec.setIdTipoEstablecimiento(ValidationUtils.intTransform(errors, request.getParameter(ParameterNames.TIPO_ESTABLECIMIENTO)));
+			ec.setIdTipoEstablecimiento(ValidationUtils.intTransform(errors, request.getParameter(ParameterNames.ESTABLECIMIENTO)));
 
 			try {
 				Integer currentPage = WebPaginUtils.getCurrentPage(request);
-				
-
+			
 				Results<EstablecimientoDTO> results = establecimientoService.findByCriteria(ec,(currentPage-1)*Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_PROPERTIES, PAGE_SIZE)) +1, Integer.valueOf(cfgM.getParameter(WEB_RAVEGRAM_PROPERTIES, PAGE_SIZE)));
 				request.setAttribute(AttributeNames.ESTABLECIMIENTOS, results.getData());
 
